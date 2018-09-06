@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.meituan.robust.PatchExecutor;
 /**
  * For users of Robust you may only to use MainActivity or SecondActivity,other classes are used for test.<br>
@@ -36,35 +34,25 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        button = (Button) findViewById(R.id.button);
-        textView = (TextView) findViewById(R.id.textView);
-        Button patch = (Button) findViewById(R.id.patch);
+        button = findViewById(R.id.button);
+        textView = findViewById(R.id.textView);
+        Button patch = findViewById(R.id.patch);
         //beigin to patch
-        patch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isGrantSDCardReadPermission()) {
-                    runRobust();
-                } else {
-                    requestPermission();
-                }
+        patch.setOnClickListener(v -> {
+            if (isGrantSDCardReadPermission()) {
+                runRobust();
+            } else {
+                requestPermission();
             }
         });
 
-        findViewById(R.id.jump_second_activity).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                startActivity(intent);
-            }
+        findViewById(R.id.jump_second_activity).setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+            startActivity(intent);
         });
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "arrived in ", Toast.LENGTH_SHORT).show();
-            }
-        });
+        button.setOnClickListener(
+                v -> Toast.makeText(MainActivity.this, "arrived in ", Toast.LENGTH_SHORT).show());
 
     }
 

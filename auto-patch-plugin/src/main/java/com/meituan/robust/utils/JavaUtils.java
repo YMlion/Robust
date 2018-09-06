@@ -1,7 +1,6 @@
 package com.meituan.robust.utils;
 
 import com.meituan.robust.Constants;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,7 +14,6 @@ import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-
 import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
@@ -43,7 +41,7 @@ public class JavaUtils {
 
     public static Object getMapFromZippedFile(String path) {
         File file = new File(path);
-        Object result = null;
+        Object result;
         try {
             if (file.exists()) {
                 FileInputStream fileIn = new FileInputStream(file);
@@ -80,7 +78,7 @@ public class JavaUtils {
         long count = 0L;
 
         int n1;
-        for (boolean n = false; -1 != (n1 = input.read(buffer)); count += (long) n1) {
+        for (; -1 != (n1 = input.read(buffer)); count += (long) n1) {
             output.write(buffer, 0, n1);
         }
 
@@ -91,7 +89,7 @@ public class JavaUtils {
         if (!file.isFile()) {
             return "";
         }
-        MessageDigest digest = null;
+        MessageDigest digest;
         byte[] buffer = new byte[4096];
         int len;
         try {
@@ -179,7 +177,7 @@ public class JavaUtils {
     public static String getParameterValue(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            stringBuilder.append("var" + i);
+            stringBuilder.append("var").append(i);
             if (i != length - 1) {
                 stringBuilder.append(",");
             }
@@ -192,7 +190,7 @@ public class JavaUtils {
         try {
             for (int i = 0; i < ctMethod.getParameterTypes().length; i++) {
                 methodSignure.append(ctMethod.getParameterTypes()[i].getName());
-                methodSignure.append(" var" + i);
+                methodSignure.append(" var").append(i);
                 if (i != ctMethod.getParameterTypes().length - 1) {
                     methodSignure.append(",");
                 }
@@ -204,26 +202,28 @@ public class JavaUtils {
     }
 
     public static String getRealParamtersBody() {
-        StringBuilder realParameterBuilder = new StringBuilder();
-        realParameterBuilder.append("public  Object[] " + Constants.GET_REAL_PARAMETER + " (Object[] args){");
-        realParameterBuilder.append("if (args == null || args.length < 1) {");
-        realParameterBuilder.append(" return args;");
-        realParameterBuilder.append("}");
-        realParameterBuilder.append(" Object[] realParameter = new Object[args.length];");
-        realParameterBuilder.append("for (int i = 0; i < args.length; i++) {");
-        realParameterBuilder.append("if (args[i] instanceof Object[]) {");
-        realParameterBuilder.append("realParameter[i] =" + Constants.GET_REAL_PARAMETER + "((Object[]) args[i]);");
-        realParameterBuilder.append("} else {");
-        realParameterBuilder.append("if (args[i] ==this) {");
-        realParameterBuilder.append(" realParameter[i] =this." + ORIGINCLASS + ";");
-        realParameterBuilder.append("} else {");
-        realParameterBuilder.append(" realParameter[i] = args[i];");
-        realParameterBuilder.append(" }");
-        realParameterBuilder.append(" }");
-        realParameterBuilder.append(" }");
-        realParameterBuilder.append("  return realParameter;");
-        realParameterBuilder.append(" }");
-        return realParameterBuilder.toString();
+        return ("public  Object[] " + Constants.GET_REAL_PARAMETER + " (Object[] args){")
+                + "if (args == null || args.length < 1) {"
+                + " return args;"
+                + "}"
+                + " Object[] realParameter = new Object[args.length];"
+                + "for (int i = 0; i < args.length; i++) {"
+                + "if (args[i] instanceof Object[]) {"
+                + "realParameter[i] ="
+                + Constants.GET_REAL_PARAMETER
+                + "((Object[]) args[i]);"
+                + "} else {"
+                + "if (args[i] ==this) {"
+                + " realParameter[i] =this."
+                + ORIGINCLASS
+                + ";"
+                + "} else {"
+                + " realParameter[i] = args[i];"
+                + " }"
+                + " }"
+                + " }"
+                + "  return realParameter;"
+                + " }";
     }
 
     public static boolean isInnerClassInModifiedClass(String className, CtClass modifedClass) {
@@ -239,11 +239,13 @@ public class JavaUtils {
         try {
             CtField originField = new CtField(sourceClass, ORIGINCLASS, patchClass);
             patchClass.addField(originField);
-            StringBuilder patchClassConstruct = new StringBuilder();
-            patchClassConstruct.append(" public Patch(Object o) {");
-            patchClassConstruct.append(ORIGINCLASS + "=(" + sourceClass.getName() + ")o;");
-            patchClassConstruct.append("}");
-            CtConstructor constructor = CtNewConstructor.make(patchClassConstruct.toString(), patchClass);
+            String patchClassConstruct = " public Patch(Object o) {"
+                    + ORIGINCLASS
+                    + "=("
+                    + sourceClass.getName()
+                    + ")o;"
+                    + "}";
+            CtConstructor constructor = CtNewConstructor.make(patchClassConstruct, patchClass);
             patchClass.addConstructor(constructor);
         } catch (Exception e) {
             e.printStackTrace();
@@ -268,7 +270,6 @@ public class JavaUtils {
         }
         for (String key : memberMappingInfo.keySet())
             System.out.println("key is   " + key + "  value is    " + memberMappingInfo.get(key));
-        System.out.println("");
     }
 
     public static void printList(List<String> list) {
@@ -277,7 +278,6 @@ public class JavaUtils {
         }
         for (String key : list)
             System.out.println("key is   " + key);
-        System.out.println("");
     }
 
 

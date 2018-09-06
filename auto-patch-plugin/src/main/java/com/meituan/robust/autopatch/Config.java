@@ -1,7 +1,6 @@
 package com.meituan.robust.autopatch;
 
 import com.meituan.robust.Constants;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javassist.ClassPool;
 import javassist.CtMethod;
 
@@ -29,9 +27,9 @@ public final class Config {
     public static String patchPackageName = Constants.PATCH_PACKAGENAME;
     public static String mappingFilePath;
     public static Set<String> patchMethodSignatureSet = new HashSet<>();
-    public static List<String> newlyAddedClassNameList = new ArrayList<String>();
+    public static List<String> newlyAddedClassNameList = new ArrayList<>();
     public static Set newlyAddedMethodSet = new HashSet<String>();
-    public static List<String> modifiedClassNameList = new ArrayList<String>();
+    public static List<String> modifiedClassNameList = new ArrayList<>();
     public static List<String> hotfixPackageList = new ArrayList<>();
     public static LinkedHashMap<String, Integer> methodMap = new LinkedHashMap<>();
     public static  String robustGenerateDirectory;
@@ -49,8 +47,8 @@ public final class Config {
         patchPackageName = Constants.PATCH_PACKAGENAME;
         mappingFilePath = DEFAULT_MAPPING_FILE;
         patchMethodSignatureSet = new HashSet<>();
-        newlyAddedClassNameList = new ArrayList<String>();
-        modifiedClassNameList = new ArrayList<String>();
+        newlyAddedClassNameList = new ArrayList<>();
+        modifiedClassNameList = new ArrayList<>();
         hotfixPackageList = new ArrayList<>();
         newlyAddedMethodSet = new HashSet<>();
         invokeSuperMethodMap = new HashMap<>();

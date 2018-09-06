@@ -1,15 +1,14 @@
 apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'
 //apply plugin: 'auto-patch-plugin'
 apply plugin: 'robust'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.meituan.robust.sample"
-        minSdkVersion 9
-        targetSdkVersion 23
+        minSdkVersion 19
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
     }
@@ -23,14 +22,12 @@ android {
     }
     buildTypes {
         release {
-//            minifyEnabled false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.meituan
         }
         debug {
             minifyEnabled true
-//            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -39,7 +36,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-
     }
     packagingOptions {
         exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
@@ -55,14 +51,9 @@ configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 dependencies {
-    compile 'com.google.code.gson:gson:2.7'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.squareup.okhttp:okhttp:2.5.0'
-    compile 'com.google.code.gson:gson:2.3.1'
-    compile 'com.android.support:design:24.2.1'
-    compile 'org.javassist:javassist:3.20.0-GA'
-    compile project(path: ':patch')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation project(path: ':patch')
 }

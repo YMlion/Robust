@@ -51,6 +51,9 @@ public class PermissionUtils {
     }
 
     public static void requestSDCardReadPermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, requestCode);
+        ActivityCompat.requestPermissions(activity, new String[] {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        }, requestCode);
     }
 }

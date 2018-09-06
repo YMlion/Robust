@@ -42,7 +42,7 @@ public class EnhancedRobustUtils {
     }
 
     public static Method getDeclaredMethod(Object object, String methodName, Class[] parameterTypes, Class declaringClass) {
-        Method method = null;
+        Method method;
         if (null == declaringClass || !declaringClass.isInterface()) {
 
             for (Class<?> clazz = object.getClass(); clazz != null; clazz = clazz.getSuperclass()) {

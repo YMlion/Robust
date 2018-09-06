@@ -1,9 +1,21 @@
 package robust.gradle.plugin.asm;
 
-import com.android.utils.AsmUtils;
+import com.android.build.gradle.internal.incremental.ByteCodeUtils;
 import com.meituan.robust.ChangeQuickRedirect;
 import com.meituan.robust.Constants;
-
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipOutputStream;
+import javassist.CannotCompileException;
+import javassist.CtClass;
+import javassist.bytecode.AccessFlag;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -15,22 +27,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodNode;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.jar.JarOutputStream;
-import java.util.zip.ZipOutputStream;
-
-import javassist.CannotCompileException;
-import javassist.CtClass;
-import javassist.bytecode.AccessFlag;
-import robust.gradle.plugin.InsertcodeStrategy;
-
+import robust.gradle.plugin.InsertCodeStrategy;
 
 /**
  * Created by zhangmeng on 2017/5/10.
@@ -38,26 +35,31 @@ import robust.gradle.plugin.InsertcodeStrategy;
  * insert code using asm
  */
 
-public class AsmInsertImpl extends InsertcodeStrategy {
+public class AsmInsertImpl extends InsertCodeStrategy {
 
-
-    public AsmInsertImpl(List<String> hotfixPackageList, List<String> hotfixMethodList, List<String> exceptPackageList, List<String> exceptMethodList, boolean isHotfixMethodLevel, boolean isExceptMethodLevel) {
-        super(hotfixPackageList, hotfixMethodList, exceptPackageList, exceptMethodList, isHotfixMethodLevel, isExceptMethodLevel);
+    public AsmInsertImpl(List<String> hotfixPackageList, List<String> hotfixMethodList,
+            List<String> exceptPackageList, List<String> exceptMethodList,
+            boolean isHotfixMethodLevel, boolean isExceptMethodLevel) {
+        super(hotfixPackageList, hotfixMethodList, exceptPackageList, exceptMethodList,
+              isHotfixMethodLevel, isExceptMethodLevel);
     }
 
-    @Override
-    protected void insertCode(List<CtClass> box, File jarFile) throws IOException, CannotCompileException {
+    @Override protected void insertCode(List<CtClass> box, File jarFile)
+            throws IOException, CannotCompileException {
         ZipOutputStream outStream = new JarOutputStream(new FileOutputStream(jarFile));
         //get every class in the box ,ready to insert code
         for (CtClass ctClass : box) {
             //change modifier to public ,so all the class in the apk will be public ,you will be able to access it in the patch
             ctClass.setModifiers(AccessFlag.setPublic(ctClass.getModifiers()));
-            if (isNeedInsertClass(ctClass.getName()) && !(ctClass.isInterface() || ctClass.getDeclaredMethods().length < 1)) {
+            if (isNeedInsertClass(ctClass.getName()) && !(ctClass.isInterface()
+                    || ctClass.getDeclaredMethods().length < 1)) {
                 //only insert code into specific classes
-                zipFile(transformCode(ctClass.toBytecode(), ctClass.getName().replaceAll("\\.", "/")), outStream, ctClass.getName().replaceAll("\\.", "/") + ".class");
+                zipFile(transformCode(ctClass.toBytecode(),
+                                      ctClass.getName().replaceAll("\\.", "/")), outStream,
+                        ctClass.getName().replaceAll("\\.", "/") + ".class");
             } else {
-                zipFile(ctClass.toBytecode(), outStream, ctClass.getName().replaceAll("\\.", "/") + ".class");
-
+                zipFile(ctClass.toBytecode(), outStream,
+                        ctClass.getName().replaceAll("\\.", "/") + ".class");
             }
         }
         outStream.close();
@@ -65,32 +67,30 @@ public class AsmInsertImpl extends InsertcodeStrategy {
 
     private class InsertMethodBodyAdapter extends ClassVisitor implements Opcodes {
 
-        public InsertMethodBodyAdapter() {
-            super(Opcodes.ASM5);
-        }
-
         ClassWriter classWriter;
         private String className;
         //this maybe change in the future
         private Map<String, Boolean> methodInstructionTypeMap;
 
-        public InsertMethodBodyAdapter(ClassWriter cw, String className, Map<String, Boolean> methodInstructionTypeMap) {
+        public InsertMethodBodyAdapter(ClassWriter cw, String className,
+                Map<String, Boolean> methodInstructionTypeMap) {
             super(Opcodes.ASM5, cw);
             this.classWriter = cw;
             this.className = className;
             this.methodInstructionTypeMap = methodInstructionTypeMap;
             //insert the field
-            classWriter.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, Constants.INSERT_FIELD_NAME, Type.getDescriptor(ChangeQuickRedirect.class), null, null);
+            classWriter.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
+                                   Constants.INSERT_FIELD_NAME,
+                                   Type.getDescriptor(ChangeQuickRedirect.class), null, null);
         }
 
-
         @Override
-        public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+        public MethodVisitor visitMethod(int access, String name, String desc, String signature,
+                String[] exceptions) {
             if (isProtect(access)) {
                 access = setPublic(access);
             }
-            MethodVisitor mv = super.visitMethod(access, name,
-                    desc, signature, exceptions);
+            MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
 
             if (!isQualifiedMethod(access, name, desc, methodInstructionTypeMap)) {
                 return mv;
@@ -105,8 +105,14 @@ public class AsmInsertImpl extends InsertcodeStrategy {
                 parameters.deleteCharAt(parameters.length() - 1);
             }
             //record method number
-            methodMap.put(className.replace('/', '.') + "." + name + "(" + parameters.toString() + ")", insertMethodCount.incrementAndGet());
-            return new MethodBodyInsertor(mv, className, desc, isStatic(access), String.valueOf(insertMethodCount.get()), name, access);
+            methodMap.put(className.replace('/', '.')
+                                  + "."
+                                  + name
+                                  + "("
+                                  + parameters.toString()
+                                  + ")", insertMethodCount.incrementAndGet());
+            return new MethodBodyInserter(mv, className, desc, isStatic(access),
+                                          String.valueOf(insertMethodCount.get()), name, access);
         }
 
         private boolean isProtect(int access) {
@@ -117,9 +123,11 @@ public class AsmInsertImpl extends InsertcodeStrategy {
             return (access & ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED)) | Opcodes.ACC_PUBLIC;
         }
 
-        private boolean isQualifiedMethod(int access, String name, String desc, Map<String, Boolean> c) {
+        private boolean isQualifiedMethod(int access, String name, String desc,
+                Map<String, Boolean> c) {
             //类初始化函数和构造函数过滤
-            if (AsmUtils.CLASS_INITIALIZER.equals(name) || AsmUtils.CONSTRUCTOR.equals(name)) {
+            if (ByteCodeUtils.CLASS_INITIALIZER.equals(name) || ByteCodeUtils.CONSTRUCTOR
+                    .equals(name)) {
                 return false;
             }
             //@warn 这部分代码请重点review一下，判断条件写错会要命
@@ -166,46 +174,42 @@ public class AsmInsertImpl extends InsertcodeStrategy {
             }
 
             return !isHotfixMethodLevel;
-
         }
 
-        class MethodBodyInsertor extends GeneratorAdapter implements Opcodes {
+        class MethodBodyInserter extends GeneratorAdapter implements Opcodes {
             private String className;
             private Type[] argsType;
             private Type returnType;
-            List<Type> paramsTypeClass = new ArrayList();
+            List<Type> paramsTypeClass = new ArrayList<>();
             boolean isStatic;
-            //目前methodid是int类型的，未来可能会修改为String类型的，这边进行了一次强转
+            //目前methodId是int类型的，未来可能会修改为String类型的，这边进行了一次强转
             String methodId;
 
-            public MethodBodyInsertor(MethodVisitor mv, String className, String desc, boolean isStatic, String methodId, String name, int access) {
+            public MethodBodyInserter(MethodVisitor mv, String className, String desc,
+                    boolean isStatic, String methodId, String name, int access) {
                 super(Opcodes.ASM5, mv, access, name, desc);
                 this.className = className;
                 this.returnType = Type.getReturnType(desc);
                 Type[] argsType = Type.getArgumentTypes(desc);
-                for (Type type : argsType) {
-                    paramsTypeClass.add(type);
-                }
+                paramsTypeClass.addAll(Arrays.asList(argsType));
                 this.isStatic = isStatic;
                 this.methodId = methodId;
             }
 
-
-            @Override
-            public void visitCode() {
+            @Override public void visitCode() {
                 //insert code here
-                RobustAsmUtils.createInsertCode(this, className, paramsTypeClass, returnType, isStatic, Integer.valueOf(methodId));
+                RobustAsmUtils
+                        .createInsertCode(this, className, paramsTypeClass, returnType, isStatic,
+                                          Integer.valueOf(methodId));
             }
-
         }
 
         private boolean isStatic(int access) {
             return (access & Opcodes.ACC_STATIC) != 0;
         }
-
     }
 
-    public byte[] transformCode(byte[] b1, String className) throws IOException {
+    public byte[] transformCode(byte[] b1, String className) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         ClassReader cr = new ClassReader(b1);
         ClassNode classNode = new ClassNode();
@@ -222,9 +226,9 @@ public class AsmInsertImpl extends InsertcodeStrategy {
             }
             methodInstructionTypeMap.put(m.name + m.desc, isMethodInvoke);
         }
-        InsertMethodBodyAdapter insertMethodBodyAdapter = new InsertMethodBodyAdapter(cw, className, methodInstructionTypeMap);
+        InsertMethodBodyAdapter insertMethodBodyAdapter =
+                new InsertMethodBodyAdapter(cw, className, methodInstructionTypeMap);
         cr.accept(insertMethodBodyAdapter, ClassReader.EXPAND_FRAMES);
         return cw.toByteArray();
     }
-
 }

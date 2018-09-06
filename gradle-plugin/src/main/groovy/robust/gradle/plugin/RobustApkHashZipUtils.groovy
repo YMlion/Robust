@@ -9,10 +9,10 @@ import java.util.zip.*
  */
 class RobustApkHashZipUtils {
     static void packZip(File output, List<File> sources) throws IOException {
-        ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(output));
-        zipOut.setLevel(Deflater.BEST_SPEED);
+        ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(output))
+        zipOut.setLevel(Deflater.BEST_SPEED)
 
-        List<File> fileList = new LinkedList<File>();
+        List<File> fileList = new LinkedList<File>()
         for (Object source : sources) {
             if (source instanceof File){
                 fileList.add(source)
@@ -25,93 +25,93 @@ class RobustApkHashZipUtils {
 
         for (File source : fileList) {
             if (source.isDirectory()) {
-                zipDir(zipOut, "", source);
+                zipDir(zipOut, "", source)
             } else {
-                zipFile(zipOut, "", source);
+                zipFile(zipOut, "", source)
             }
         }
-        zipOut.flush();
-        zipOut.close();
+        zipOut.flush()
+        zipOut.close()
     }
 
     private static String buildPath(String path, String file) {
         if (path == null || path == "") {
-            return file;
+            return file
         } else {
-            return path + "/" + file;
+            return path + "/" + file
         }
     }
 
     private static void zipDir(ZipOutputStream zos, String path, File dir) throws IOException {
         if (!dir.canRead()) {
-            return;
+            return
         }
 
-        File[] files = dir.listFiles();
-        path = buildPath(path, dir.getName());
+        File[] files = dir.listFiles()
+        path = buildPath(path, dir.getName())
 
         for (File source : files) {
             if (source.isDirectory()) {
-                zipDir(zos, path, source);
+                zipDir(zos, path, source)
             } else {
-                zipFile(zos, path, source);
+                zipFile(zos, path, source)
             }
         }
 
     }
 
-    def static void zipFile(ZipOutputStream zos, String path, File file) throws IOException {
+    static void zipFile(ZipOutputStream zos, String path, File file) throws IOException {
         if (!file.canRead()) {
-            return;
+            return
         }
 
-        zos.putNextEntry(new ZipEntry(buildPath(path, file.getAbsolutePath())));
+        zos.putNextEntry(new ZipEntry(buildPath(path, file.getAbsolutePath())))
 
-        FileInputStream fis = new FileInputStream(file);
+        FileInputStream fis = new FileInputStream(file)
 
-        byte[] buffer = new byte[4092];
-        int byteCount = 0;
+        byte[] buffer = new byte[4092]
+        int byteCount
         while ((byteCount = fis.read(buffer)) != -1) {
-            zos.write(buffer, 0, byteCount);
-            System.out.flush();
+            zos.write(buffer, 0, byteCount)
+            System.out.flush()
         }
 
-        fis.close();
-        zos.closeEntry();
+        fis.close()
+        zos.closeEntry()
     }
 
-    def static void addApkHashFile2ApFile(File apFile, File robustHashFile) {
-        def tempZipFile = new File(apFile.name + "temp", apFile.parentFile);
+    static void addApkHashFile2ApFile(File apFile, File robustHashFile) {
+        def tempZipFile = new File(apFile.name + "temp", apFile.parentFile)
         if (tempZipFile.exists()) {
-            tempZipFile.delete();
+            tempZipFile.delete()
         }
 
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(tempZipFile))
 
         //copy ap file
         ZipFile apZipFile = new ZipFile(apFile)
-        final Enumeration<? extends ZipEntry> entries = apZipFile.entries();
+        final Enumeration<? extends ZipEntry> entries = apZipFile.entries()
         while (entries.hasMoreElements()) {
-            ZipEntry originZipEntry = entries.nextElement();
-            ZipEntry rightZipEntry = getRightZipEntry(originZipEntry);
+            ZipEntry originZipEntry = entries.nextElement()
+            ZipEntry rightZipEntry = getRightZipEntry(originZipEntry)
             if (null != rightZipEntry) {
                 addZipEntry(zipOutputStream, rightZipEntry, apZipFile.getInputStream(originZipEntry))
             }
         }
 
         //add hash file
-        String entryName = "assets/" + Constants.ROBUST_APK_HASH_FILE_NAME;
-        ZipEntry zipEntry = new ZipEntry(entryName);
-        zipEntry.setMethod(ZipEntry.STORED);
-        zipEntry.setSize(robustHashFile.length());
-        zipEntry.setCompressedSize(robustHashFile.length());
-        zipEntry.setCrc(computeFileCrc32(robustHashFile));
+        String entryName = "assets/" + Constants.ROBUST_APK_HASH_FILE_NAME
+        ZipEntry zipEntry = new ZipEntry(entryName)
+        zipEntry.setMethod(ZipEntry.STORED)
+        zipEntry.setSize(robustHashFile.length())
+        zipEntry.setCompressedSize(robustHashFile.length())
+        zipEntry.setCrc(computeFileCrc32(robustHashFile))
 
-        FileInputStream hashFileInputStream = new FileInputStream(robustHashFile);
+        FileInputStream hashFileInputStream = new FileInputStream(robustHashFile)
 
         addZipEntry(zipOutputStream, zipEntry, hashFileInputStream)
 
-        hashFileInputStream.close();
+        hashFileInputStream.close()
         zipOutputStream.close()
 
         apFile.delete()
@@ -119,7 +119,7 @@ class RobustApkHashZipUtils {
     }
 
     private static ZipEntry getRightZipEntry(ZipEntry originZipEntry){
-        ZipEntry rightZipEntry = new ZipEntry(originZipEntry.getName());
+        ZipEntry rightZipEntry = new ZipEntry(originZipEntry.getName())
         if (ZipEntry.STORED == originZipEntry.getMethod()) {
             rightZipEntry.setMethod(ZipEntry.STORED)
             rightZipEntry.setSize(originZipEntry.getSize())
@@ -143,17 +143,17 @@ class RobustApkHashZipUtils {
         if (originZipEntry.getTime() > 0) {
             rightZipEntry.setTime(originZipEntry.getTime())
         }
-        return rightZipEntry;
+        return rightZipEntry
     }
 
     private static long computeFileCrc32(File file) throws IOException {
-        InputStream inputStream = new FileInputStream(file);
-        CRC32 crc = new CRC32();
-        int index;
+        InputStream inputStream = new FileInputStream(file)
+        CRC32 crc = new CRC32()
+        int index
         while ((index = inputStream.read()) != -1) {
-            crc.update(index);
+            crc.update(index)
         }
-        return crc.getValue();
+        return crc.getValue()
     }
 
     /**
@@ -167,20 +167,20 @@ class RobustApkHashZipUtils {
     private
     static void addZipEntry(ZipOutputStream zipOutputStream, ZipEntry zipEntry, InputStream inputStream) throws Exception {
         try {
-            zipOutputStream.putNextEntry(zipEntry);
-            byte[] buffer = new byte[1024];
-            int length = -1;
+            zipOutputStream.putNextEntry(zipEntry)
+            byte[] buffer = new byte[1024]
+            int length
             while ((length = inputStream.read(buffer, 0, buffer.length)) != -1) {
-                zipOutputStream.write(buffer, 0, length);
-                zipOutputStream.flush();
+                zipOutputStream.write(buffer, 0, length)
+                zipOutputStream.flush()
             }
         } catch (ZipException e) {
             // do nothing
         } finally {
             if (inputStream != null) {
-                inputStream.close();
+                inputStream.close()
             }
-            zipOutputStream.closeEntry();
+            zipOutputStream.closeEntry()
         }
     }
 }

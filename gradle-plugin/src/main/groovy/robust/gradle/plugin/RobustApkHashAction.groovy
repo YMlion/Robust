@@ -66,7 +66,7 @@ class RobustApkHashAction implements Action<Project> {
                     }
 
                     //protected FileCollection assets;
-                    FileCollection assets = null;
+                    FileCollection assets = null
                     try {
                         assets = packageTask.assets
                     } catch (MissingPropertyException e) {
@@ -78,10 +78,9 @@ class RobustApkHashAction implements Action<Project> {
                     String robustHash = computeRobustHash(partFiles)
 
                     if (assets instanceof FileCollection) {
-                        FileCollection assetsFileCollection = (FileCollection) assets;
+                        FileCollection assetsFileCollection = (FileCollection) assets
                         createHashFile(assetsFileCollection.asPath, Constants.ROBUST_APK_HASH_FILE_NAME, robustHash)
                     }
-                    return
 
                 } else {
 
@@ -123,8 +122,8 @@ class RobustApkHashAction implements Action<Project> {
                 }
 
 
-                File assets = null;
-                try {
+                    File assets = null
+                    try {
                     assets = packageTask.assets
                 } catch (MissingPropertyException e) {
                     // Android Gradle Plugin version < 2.2.0-beta1
@@ -142,7 +141,7 @@ class RobustApkHashAction implements Action<Project> {
                 } else {
                     // add robustHashFile to resourceFile
                     File robustHashFile = createHashFile(resourceFile.parentFile.absolutePath, Constants.ROBUST_APK_HASH_FILE_NAME, robustHash)
-                    RobustApkHashZipUtils.addApkHashFile2ApFile(resourceFile, robustHashFile);
+                    RobustApkHashZipUtils.addApkHashFile2ApFile(resourceFile, robustHashFile)
                 }
 
                 String buildRubustDir = "${project.buildDir}" + File.separator + "$Constants.ROBUST_GENERATE_DIRECTORY" + File.separator
@@ -157,8 +156,7 @@ class RobustApkHashAction implements Action<Project> {
         }
     }
 
-
-    def String computeRobustHash(ArrayList<File> partFiles) {
+    String computeRobustHash(ArrayList<File> partFiles) {
         File sumFile = new File("temp_robust_sum.zip")
         RobustApkHashZipUtils.packZip(sumFile, partFiles)
         String apkHashValue = fileMd5(sumFile)
@@ -168,29 +166,29 @@ class RobustApkHashAction implements Action<Project> {
         return apkHashValue
     }
 
-    def String fileMd5(File file) {
+    String fileMd5(File file) {
         if (!file.isFile()) {
-            return "";
+            return ""
         }
-        MessageDigest digest;
-        byte[] buffer = new byte[4096];
-        int len;
+        MessageDigest digest
+        byte[] buffer = new byte[4096]
+        int len
         try {
-            digest = MessageDigest.getInstance("MD5");
-            FileInputStream inputStream = new FileInputStream(file);
+            digest = MessageDigest.getInstance("MD5")
+            FileInputStream inputStream = new FileInputStream(file)
             while ((len = inputStream.read(buffer, 0, 1024)) != -1) {
-                digest.update(buffer, 0, len);
+                digest.update(buffer, 0, len)
             }
-            inputStream.close();
+            inputStream.close()
         } catch (Exception e) {
-            return "";
+            return ""
         }
 
-        BigInteger bigInt = new BigInteger(1, digest.digest());
-        return bigInt.toString(16);
+        BigInteger bigInt = new BigInteger(1, digest.digest())
+        return bigInt.toString(16)
     }
 
-    def static File createHashFile(String dir, String hashFileName, String hashValue) {
+    static File createHashFile(String dir, String hashFileName, String hashValue) {
         File hashFile = new File(dir, hashFileName)
         if (hashFile.exists()) {
             hashFile.delete()
@@ -202,14 +200,14 @@ class RobustApkHashAction implements Action<Project> {
         return hashFile
     }
 
-    public static boolean isGradlePlugin300orAbove() {
+    static boolean isGradlePlugin300orAbove() {
         try {
             String gradlePluginVersion = getGradlePluginVersion()
-            return gradlePluginVersion.compareTo("3.0.0") >= 0;
+            return gradlePluginVersion >= "3.0.0"
         } catch (Throwable throwable) {
 
         }
-        return false;
+        return false
     }
 
     static String getGradlePluginVersion() {

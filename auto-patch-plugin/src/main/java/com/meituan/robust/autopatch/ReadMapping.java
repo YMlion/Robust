@@ -17,7 +17,7 @@ import java.util.Map;
 public class ReadMapping {
     private static ReadMapping instance;
 
-    private Map<String, ClassMapping> usedInModifiedClassMappingInfo = new HashMap<String, ClassMapping>();
+    private Map<String, ClassMapping> usedInModifiedClassMappingInfo = new HashMap<>();
 
     public static ReadMapping getInstance() {
         if (instance == null) {
@@ -36,8 +36,6 @@ public class ReadMapping {
 
     /***
      * read all class mapping info
-     *
-     * @return
      */
     public void initMappingInfo() {
         //查找mapping文件
@@ -62,7 +60,9 @@ public class ReadMapping {
                 if (line.indexOf("->") > 0 && line.indexOf(":") == line.length() - 1) {
                     ClassMapping classMapping = new ClassMapping();
                     classMapping.setClassName(line.substring(0, line.indexOf("->") - 1).trim());
-                    classMapping.setValueName(line.split("->")[1].substring(0, line.split("->")[1].length() - 1).trim());
+                    classMapping.setValueName(
+                            line.split("->")[1].substring(0, line.split("->")[1].length() - 1)
+                                               .trim());
                     line = reader.readLine();
                     while (line != null) {
                         line = line.trim();
@@ -76,10 +76,14 @@ public class ReadMapping {
                         }
                         if (lineinfo[1].contains("(") && lineinfo[1].contains(")")) {
                             //methods need return type
-                            classMapping.getMemberMapping().put(getMethodSigureWithReturnTypeInMapping(lineinfo[0].trim(), lineinfo[1].trim()), lineinfo[3].trim());
+                            classMapping.getMemberMapping()
+                                        .put(getMethodSigureWithReturnTypeInMapping(
+                                                lineinfo[0].trim(), lineinfo[1].trim()),
+                                             lineinfo[3].trim());
                         } else {
                             //fields
-                            classMapping.getMemberMapping().put(lineinfo[1].trim(), lineinfo[3].trim());
+                            classMapping.getMemberMapping()
+                                        .put(lineinfo[1].trim(), lineinfo[3].trim());
                         }
                         line = reader.readLine();
                         if (line == null) {
@@ -121,16 +125,19 @@ public class ReadMapping {
 
     /***
      * @param returnTypeWithNumber
-     * @param methodSignure
-     * @return returnType+" "+methodSignure,just one blank
+     * @param methodSignature
+     * @return returnType+" "+methodSignature,just one blank
      */
 
-    public String getMethodSigureWithReturnTypeInMapping(String returnTypeWithNumber, String methodSignure) {
+    public String getMethodSigureWithReturnTypeInMapping(String returnTypeWithNumber,
+            String methodSignature) {
         //初步观察mapping文件，使用":"来截取返回值，还可以通过寻找第一个字符，
-        return getMethodSignureWithReturnType(returnTypeWithNumber.substring(returnTypeWithNumber.lastIndexOf(":") + 1), methodSignure);
+        return getMethodSignatureWithReturnType(
+                returnTypeWithNumber.substring(returnTypeWithNumber.lastIndexOf(":") + 1),
+                methodSignature);
     }
 
-    public String getMethodSignureWithReturnType(String returnType, String methodSignure) {
+    public String getMethodSignatureWithReturnType(String returnType, String methodSignure) {
         //只有一个空格
         return returnType + " " + methodSignure;
     }
