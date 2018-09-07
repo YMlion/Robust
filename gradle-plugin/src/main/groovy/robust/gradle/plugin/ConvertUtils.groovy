@@ -5,6 +5,7 @@ import com.android.build.api.transform.TransformInput
 import javassist.ClassPool
 import javassist.CtClass
 import javassist.NotFoundException
+import org.apache.commons.io.FileUtils
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile

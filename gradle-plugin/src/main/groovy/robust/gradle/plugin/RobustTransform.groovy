@@ -155,7 +155,7 @@ class RobustTransform extends Transform implements Plugin<Project> {
         }
 
         def box = ConvertUtils.toCtClasses(inputs, classPool)
-        // def cost = (System.currentTimeMillis() - startTime) / 1000
+        def cost = (System.currentTimeMillis() - startTime) / 1000
         //        logger.quiet "check all class cost $cost second, class count: ${box.size()}"
         if (useASM) {
             insertcodeStrategy =
