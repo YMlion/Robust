@@ -116,20 +116,26 @@ class AutoPatchTransform extends Transform implements Plugin<Project> {
         //        JavaUtils.removeJarFromLibs()
         logger.quiet '================method singure to methodid is printed below================'
         JavaUtils.printMap(Config.methodMap)
-        if (Config.deleteOutputs) {
+        if (Config.changePatchDir) {
             def patch = new File(Config.robustGenerateDirectory, Constants.PATACH_JAR_NAME)
             def buildTime = new SimpleDateFormat("yyMMdd-HHmm").format(new Date())
             def patchName = "${project.name}-${Config.patchBuildType}-${project.android.defaultConfig.versionName}-${buildTime}-${Constants.PATACH_JAR_NAME}"
-            def patchTargetDir = project.buildDir
+            def patchTargetDir = new File(project.rootDir, Config.patchTargetDir)
             project.copy {
                 from patch
                 into patchTargetDir
                 rename { patchName }
             }
-            patchTargetDir.listFiles().each {
-                if (it.name != patchName) {
-                    println "autoPatch: delete ${it.absolutePath}"
-                    project.delete it
+            if (Config.deleteOutputs) {
+                project.buildDir.listFiles().each {
+                    if (it.name != patchName) {
+                        println "autoPatch: delete ${it.absolutePath}"
+                        try {
+                            project.delete it
+                        } catch (Exception e) {
+                            e.printStackTrace()
+                        }
+                    }
                 }
             }
         }

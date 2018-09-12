@@ -15,7 +15,7 @@ class ReadXML {
         }
 
         Config.isManual =
-            robust.switch.manual != null && "true" == String.valueOf(robust.switch.manual.text())
+                robust.switch.manual != null && "true" == String.valueOf(robust.switch.manual.text())
         //读取mapping文件
         if (robust.switch.proguard.text() != null && "" != robust.switch.proguard.text()) {
             Config.supportProGuard = Boolean.valueOf(robust.switch.proguard.text()).booleanValue()
@@ -28,11 +28,11 @@ class ReadXML {
         }
 
         if (Config.supportProGuard && (Config.mappingFilePath == null ||
-            "" ==
-            Config.mappingFilePath ||
-            !(new File(Config.mappingFilePath)).exists())) {
+                "" ==
+                Config.mappingFilePath ||
+                !(new File(Config.mappingFilePath)).exists())) {
             throw new RuntimeException(
-                "Not found ${Config.mappingFilePath}, please put it on your project's robust dir or change your robust.xml !")
+                    "Not found ${Config.mappingFilePath}, please put it on your project's robust dir or change your robust.xml !")
         }
 
         for (name in robust.patchPackClass.name) {
@@ -41,9 +41,9 @@ class ReadXML {
 
         for (name in robust.patchMethodSignure.name) {
             if (!JavaUtils.isMethodSignureContainPatchClassName(String.valueOf(name.text()),
-                Config.modifiedClassNameList)) {
+                    Config.modifiedClassNameList)) {
                 throw new RuntimeException(
-                    "input patchMethodSignure in robust.xml error,there are more than one patch classes,you need to config full class name and java method sigure")
+                        "input patchMethodSignure in robust.xml error,there are more than one patch classes,you need to config full class name and java method sigure")
             }
             Config.patchMethodSignatureSet.add(String.valueOf(name.text()).trim())
         }
@@ -55,10 +55,10 @@ class ReadXML {
             Config.newlyAddedClassNameList.add(name.text())
         }
         if (robust.switch.catchReflectException.text() != null &&
-            "" !=
-            robust.switch.catchReflectException.text()) {
+                "" !=
+                robust.switch.catchReflectException.text()) {
             Config.catchReflectException =
-                Boolean.valueOf(robust.switch.catchReflectException.text()).booleanValue()
+                    Boolean.valueOf(robust.switch.catchReflectException.text()).booleanValue()
         }
 
         if (robust.switch.patchLog.text() != null && "" != robust.switch.patchLog.text()) {
@@ -69,8 +69,13 @@ class ReadXML {
             Config.noNeedReflectClassSet.add(name.text())
         }
 
+        Config.changePatchDir = robust.switch.changePatchDir != null && "true" == robust.switch.changePatchDir.text()
+        if (Config.changePatchDir && robust.switch.patchTargetDir != null) {
+            Config.patchTargetDir = robust.switch.patchTargetDir.text()
+        }
+
         Config.deleteOutputs = robust.switch.deleteOutputs != null &&
-            "true" ==
-            String.valueOf(robust.switch.deleteOutputs.text())
+                "true" ==
+                String.valueOf(robust.switch.deleteOutputs.text())
     }
 }
