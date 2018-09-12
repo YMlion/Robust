@@ -209,7 +209,7 @@ public class AsmInsertImpl extends InsertCodeStrategy {
         }
     }
 
-    public byte[] transformCode(byte[] b1, String className) {
+    private byte[] transformCode(byte[] b1, String className) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         ClassReader cr = new ClassReader(b1);
         ClassNode classNode = new ClassNode();

@@ -1,5 +1,6 @@
 package robust.gradle.plugin
 
+import com.android.annotations.NonNull
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.meituan.robust.Constants
@@ -32,7 +33,7 @@ class RobustTransform extends Transform implements Plugin<Project> {
     //    private static boolean useASM = false;
     private static boolean useASM = true
     def robust
-    InsertCodeStrategy insertcodeStrategy
+    InsertCodeStrategy insertCodeStrategy
 
     @Override
     void apply(Project target) {
@@ -47,7 +48,7 @@ class RobustTransform extends Transform implements Plugin<Project> {
             for (int index = 0; index < taskNames.size(); ++index) {
                 def taskName = taskNames[index]
                 logger.debug "input start parameter task is ${taskName}"
-                //FIXME: assembleRelease下屏蔽Prepare，这里因为还没有执行Task，没法直接通过当前的BuildType来判断，所以直接分析当前的startParameter中的taskname，
+                //FIXME: assembleRelease下屏蔽Prepare，这里因为还没有执行Task，没法直接通过当前的BuildType来判断，所以直接分析当前的startParameter中的task name，
                 //另外这里有一个小坑task的名字不能是缩写必须是全称 例如assembleDebug不能是任何形式的缩写输入
                 if (taskName.endsWith("Debug") && taskName.contains("Debug")) {
                     //                    logger.warn " Don't register robust transform for debug model !!! task is：${taskName}"
@@ -134,11 +135,11 @@ class RobustTransform extends Transform implements Plugin<Project> {
     }
 
     @Override
-    void transform(Context context, Collection<TransformInput> inputs,
-        Collection<TransformInput> referencedInputs, TransformOutputProvider outputProvider,
-        boolean isIncremental) throws IOException, TransformException, InterruptedException {
+    void transform(@NonNull TransformInvocation transformInvocation)
+        throws TransformException, InterruptedException, IOException {
         logger.quiet '================robust start================'
         def startTime = System.currentTimeMillis()
+        def outputProvider = transformInvocation.outputProvider
         outputProvider.deleteAll()
         File jarFile = outputProvider.getContentLocation("main", getOutputTypes(), getScopes(),
             Format.JAR)
@@ -154,29 +155,27 @@ class RobustTransform extends Transform implements Plugin<Project> {
             classPool.appendClassPath((String) it.absolutePath)
         }
 
-        def box = ConvertUtils.toCtClasses(inputs, classPool)
-        def cost = (System.currentTimeMillis() - startTime) / 1000
-        //        logger.quiet "check all class cost $cost second, class count: ${box.size()}"
+        def box = ConvertUtils.toCtClasses(transformInvocation.inputs, classPool)
         if (useASM) {
-            insertcodeStrategy =
+            insertCodeStrategy =
                 new AsmInsertImpl(hotfixPackageList, hotfixMethodList, exceptPackageList,
                     exceptMethodList, isHotfixMethodLevel, isExceptMethodLevel)
         } else {
-            insertcodeStrategy =
+            insertCodeStrategy =
                 new JavaAssistInsertImpl(hotfixPackageList, hotfixMethodList, exceptPackageList,
                     exceptMethodList, isHotfixMethodLevel, isExceptMethodLevel)
         }
-        insertcodeStrategy.insertCode(box, jarFile)
-        writeMap2File(insertcodeStrategy.methodMap, Constants.METHOD_MAP_OUT_PATH)
+        insertCodeStrategy.insertCode(box, jarFile)
+        writeMap2File(insertCodeStrategy.methodMap, Constants.METHOD_MAP_OUT_PATH)
 
         logger.quiet "===robust print id start==="
-        for (String method : insertcodeStrategy.methodMap.keySet()) {
-            int id = insertcodeStrategy.methodMap.get(method)
+        for (String method : insertCodeStrategy.methodMap.keySet()) {
+            int id = insertCodeStrategy.methodMap.get(method)
             System.out.println("key is   " + method + "  value is    " + id)
         }
         logger.quiet "===robust print id end==="
 
-        cost = (System.currentTimeMillis() - startTime) / 1000
+        def cost = (System.currentTimeMillis() - startTime) / 1000
         logger.quiet "robust cost $cost second"
         logger.quiet '================robust   end================'
     }

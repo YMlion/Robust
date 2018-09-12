@@ -68,5 +68,9 @@ class ReadXML {
         for (name in robust.noNeedReflectClass.name) {
             Config.noNeedReflectClassSet.add(name.text())
         }
+
+        Config.deleteOutputs = robust.switch.deleteOutputs != null &&
+            "true" ==
+            String.valueOf(robust.switch.deleteOutputs.text())
     }
 }

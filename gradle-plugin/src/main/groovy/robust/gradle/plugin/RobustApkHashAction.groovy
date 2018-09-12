@@ -144,8 +144,10 @@ class RobustApkHashAction implements Action<Project> {
                     RobustApkHashZipUtils.addApkHashFile2ApFile(resourceFile, robustHashFile)
                 }
 
-                String buildRubustDir = "${project.buildDir}" + File.separator + "$Constants.ROBUST_GENERATE_DIRECTORY" + File.separator
-                createHashFile(buildRubustDir, Constants.ROBUST_APK_HASH_FILE_NAME, robustHash)
+                    String buildRobustDir = "${project.buildDir}" + File.separator +
+                        "$Constants.ROBUST_GENERATE_DIRECTORY" +
+                        File.separator
+                    createHashFile(buildRobustDir, Constants.ROBUST_APK_HASH_FILE_NAME, robustHash)
 
 //                def cost = (System.currentTimeMillis() - startTime) / 1000
 //                logger.quiet "robust apk hash is $robustHash"

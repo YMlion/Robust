@@ -223,7 +223,7 @@ public final class RobustAsmUtils {
         }
     }
 
-    private static void createBooleanObj(MethodVisitor mv, int argsPosition) {
+    private static void createByteObj(MethodVisitor mv, int argsPosition) {
         mv.visitTypeInsn(Opcodes.NEW, "java/lang/Byte");
         mv.visitInsn(Opcodes.DUP);
         mv.visitVarInsn(Opcodes.ILOAD, argsPosition);
@@ -284,11 +284,11 @@ public final class RobustAsmUtils {
      */
     private static boolean createPrimateTypeObj(MethodVisitor mv, int argsPosition, String typeS) {
         if ("Z".equals(typeS)) {
-            createBooleanObj(mv, argsPosition);
+            createByteObj(mv, argsPosition);
             return true;
         }
         if ("B".equals(typeS)) {
-            createBooleanObj(mv, argsPosition);
+            createByteObj(mv, argsPosition);
             return true;
         }
         if ("C".equals(typeS)) {

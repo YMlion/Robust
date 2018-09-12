@@ -24,6 +24,11 @@ public final class Config {
     public static boolean supportProGuard = true;
     public static boolean isLogging = true;
     public static boolean isManual = false;
+    // 构建类型
+    public static String patchBuildType = "release";
+    // 是否删除多余的生成文件，若为true，则把补丁包移动到project.buildDir中，并删除其他文件夹
+    public static boolean deleteOutputs = false;
+
     public static String patchPackageName = Constants.PATCH_PACKAGENAME;
     public static String mappingFilePath;
     public static Set<String> patchMethodSignatureSet = new HashSet<>();

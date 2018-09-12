@@ -1,6 +1,7 @@
 package robust.gradle.plugin
 
 import com.android.build.api.transform.*
+import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.meituan.robust.Constants
 import com.meituan.robust.autopatch.*
@@ -15,6 +16,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 
+import java.text.SimpleDateFormat
 import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -66,6 +68,12 @@ class AutoPatchTransform extends Transform implements Plugin<Project> {
         ReadXML.readXMl(project.projectDir.path)
         Config.methodMap =
             JavaUtils.getMapFromZippedFile(project.projectDir.path + Constants.METHOD_MAP_PATH)
+
+        def android = project.android
+
+        android.applicationVariants.all {
+            BaseVariant variant -> Config.patchBuildType = variant.buildType.name
+        }
     }
 
     @Override
@@ -96,8 +104,8 @@ class AutoPatchTransform extends Transform implements Plugin<Project> {
         logger.quiet '================autoPatch start================'
         copyJarToRobust()
         outputProvider.deleteAll()
-        def outDir = outputProvider.getContentLocation("main", outputTypes, scopes,
-            Format.DIRECTORY)
+        //        def outDir = outputProvider.getContentLocation("main", outputTypes, scopes,
+        //            Format.DIRECTORY)
         project.android.bootClasspath.each {
             Config.classPool.appendClassPath((String) it.absolutePath)
         }
@@ -108,9 +116,26 @@ class AutoPatchTransform extends Transform implements Plugin<Project> {
         //        JavaUtils.removeJarFromLibs()
         logger.quiet '================method singure to methodid is printed below================'
         JavaUtils.printMap(Config.methodMap)
+        if (Config.deleteOutputs) {
+            def patch = new File(Config.robustGenerateDirectory, Constants.PATACH_JAR_NAME)
+            def buildTime = new SimpleDateFormat("yyMMdd-HHmm").format(new Date())
+            def patchName = "${project.name}-${Config.patchBuildType}-${project.android.defaultConfig.versionName}-${buildTime}-${Constants.PATACH_JAR_NAME}"
+            def patchTargetDir = project.buildDir
+            project.copy {
+                from patch
+                into patchTargetDir
+                rename { patchName }
+            }
+            patchTargetDir.listFiles().each {
+                if (it.name != patchName) {
+                    println "autoPatch: delete ${it.absolutePath}"
+                    project.delete it
+                }
+            }
+        }
         cost = (System.currentTimeMillis() - startTime) / 1000
         logger.quiet "autoPatch cost $cost second"
-        throw new RuntimeException("auto patch end successfully")
+        throw new RuntimeException("auto patch end successfully!!!")
     }
 
     static def copyJarToRobust() {
@@ -147,7 +172,7 @@ class AutoPatchTransform extends Transform implements Plugin<Project> {
             ReadMapping.getInstance().initMappingInfo()
         }
 
-        generatPatch(box, patchPath)
+        generatePatch(box, patchPath)
 
         zipPatchClassesFile()
         executeCommand(jar2DexCommand)
@@ -188,7 +213,7 @@ class AutoPatchTransform extends Transform implements Plugin<Project> {
         }
     }
 
-    def generatPatch(List<CtClass> box, String patchPath) {
+    def generatePatch(List<CtClass> box, String patchPath) {
         if (!Config.isManual) {
             if (Config.patchMethodSignatureSet.size() < 1) {
                 throw new RuntimeException(
