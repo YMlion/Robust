@@ -133,14 +133,14 @@ class AutoPatchTransform extends Transform implements Plugin<Project> {
                         try {
                             project.delete it
                         } catch (Exception e) {
-                            e.printStackTrace()
+                            println "delete file fail."
                         }
                     }
                 }
             }
         }
         cost = (System.currentTimeMillis() - startTime) / 1000
-        logger.quiet "autoPatch cost $cost second"
+        logger.quiet "autoPatch cost $cost second."
         throw new RuntimeException("auto patch end successfully!!!")
     }
 
