@@ -36,8 +36,8 @@
         <!--是否改变补丁的输出目录-->
         <changePatchDir>false</changePatchDir>
         <!--补丁的输出目录，项目根目录是补丁输出目录的父目录或者根目录，例如目录是projectRootDir/patch，则该值为patch-->
-        <patchTargetDir>null</patchTargetDir>
-        <!-- 是否要删除所有生成的输出的文件 -->
+        <patchTargetDir>app/jars</patchTargetDir>
+        <!-- 是否要删除所有生成的输出的文件，在生成补丁包时，就算设置为true，也无法全部删除 -->
         <deleteOutputs>false</deleteOutputs>
     </switch>
 

@@ -3,9 +3,9 @@
 buildscript {
     repositories {
 //        mavenLocal()
-        maven {
+        /*maven {
             url uri('/repo')
-        }
+        }*/
         google()
         jcenter()
     }
@@ -25,9 +25,9 @@ configurations.all {
 allprojects {
     repositories {
 //        mavenLocal()
-        maven {
+        /*maven {
             url uri('../repo')
-        }
+        }*/
         google()
         jcenter()
     }

@@ -4,10 +4,7 @@ import com.meituan.robust.Constants
 import com.meituan.robust.patch.annotaion.Add
 import com.meituan.robust.patch.annotaion.Modify
 import com.meituan.robust.utils.JavaUtils
-import javassist.CannotCompileException
-import javassist.CtClass
-import javassist.CtMethod
-import javassist.NotFoundException
+import javassist.*
 import javassist.expr.ExprEditor
 import javassist.expr.MethodCall
 import org.codehaus.groovy.GroovyException
@@ -16,6 +13,7 @@ import robust.gradle.plugin.AutoPatchTransform
 
 class ReadAnnotation {
     static Logger logger
+    static int index = 0
 
     static void readAnnotation(List<CtClass> box, Logger log) {
         logger = log
@@ -90,7 +88,7 @@ class ReadAnnotation {
             addPatchMethodAndModifiedClass(patchMethodSignureSet, method)
         }
 
-        //do with lamda expression
+        //do with lambda expression
         ctclass.defrost()
         ctclass.declaredMethods.findAll {
             return Config.methodMap.get(it.longName) != null
@@ -107,6 +105,33 @@ class ReadAnnotation {
                         if (Constants.LAMBDA_MODIFY == m.method.declaringClass.name) {
                             isAllMethodsPatch = false
                             addPatchMethodAndModifiedClass(patchMethodSignureSet, method)
+                        } else if (m.methodName.contains("lambda\$")) {
+                            m.method.instrument(new ExprEditor() {
+                                @Override
+                                void edit(MethodCall mm) throws CannotCompileException {
+                                    try {
+                                        println "!! find modify methods : " + m.method.longName +
+                                            " :: " +
+                                            mm.method.declaringClass.name +
+                                            "; " +
+                                            mm.methodName
+
+                                        if (Constants.LAMBDA_MODIFY == mm.method.declaringClass.name) {
+                                            // Config.methodMap.put(m.method.longName, Config.methodMap.size() + 1)
+                                            def oC = method.getDeclaringClass()
+                                            oC.removeMethod(method)
+                                            def newMethod = CtNewMethod.copy(m.method,
+                                                method.getName(), method.getDeclaringClass(), null)
+                                            oC.addMethod(newMethod)
+                                            isAllMethodsPatch = false
+                                            addPatchMethodAndModifiedClass(patchMethodSignureSet,
+                                                newMethod)
+                                        }
+                                    } catch (Exception e) {
+                                        println "this is a exception " + e.getMessage()
+                                    }
+                                }
+                            })
                         }
                     } catch (NotFoundException e) {
                         e.printStackTrace()
