@@ -105,7 +105,8 @@ class ReadAnnotation {
                         if (Constants.LAMBDA_MODIFY == m.method.declaringClass.name) {
                             isAllMethodsPatch = false
                             addPatchMethodAndModifiedClass(patchMethodSignureSet, method)
-                        } else if (m.methodName.contains("lambda\$")) {
+                        } else if (m.methodName.contains("lambda\$") && m.methodName.endsWith(
+                            m.method.declaringClass.simpleName)) {
                             m.method.instrument(new ExprEditor() {
                                 @Override
                                 void edit(MethodCall mm) throws CannotCompileException {
@@ -117,12 +118,12 @@ class ReadAnnotation {
                                             mm.methodName
 
                                         if (Constants.LAMBDA_MODIFY == mm.method.declaringClass.name) {
-                                            // Config.methodMap.put(m.method.longName, Config.methodMap.size() + 1)
-                                            def oC = method.getDeclaringClass()
-                                            oC.removeMethod(method)
+                                            // 复制当前方法到原来的方法中，减少此次方法调用，直接复制会有问题，通过创建同名方法实现
+                                            def originalClass = method.getDeclaringClass()
+                                            originalClass.removeMethod(method)
                                             def newMethod = CtNewMethod.copy(m.method,
-                                                method.getName(), method.getDeclaringClass(), null)
-                                            oC.addMethod(newMethod)
+                                                method.getName(), originalClass, null)
+                                            originalClass.addMethod(newMethod)
                                             isAllMethodsPatch = false
                                             addPatchMethodAndModifiedClass(patchMethodSignureSet,
                                                 newMethod)
@@ -211,14 +212,6 @@ class ReadAnnotation {
         if (Config.methodMap.get(method.longName) == null) {
             print("addPatchMethodAndModifiedClass pint methodmap ")
             JavaUtils.printMap(Config.methodMap)
-            /*if (method.longName.contains("lambda\$")) {
-                Config.methodMap.put(method.longName, Config.methodMap.size() + 1)
-            } else {
-                throw new GroovyException("patch method " + method.longName +
-                    " haven't insert code by Robust.Cannot patch this method, method.signature  " +
-                    method.signature +
-                    "  ")
-            }*/
             throw new GroovyException("patch method " + method.longName +
                 " haven't insert code by Robust.Cannot patch this method, method.signature  " +
                 method.signature +
