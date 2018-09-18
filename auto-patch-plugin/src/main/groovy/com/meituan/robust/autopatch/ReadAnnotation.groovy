@@ -5,6 +5,7 @@ import com.meituan.robust.patch.annotaion.Add
 import com.meituan.robust.patch.annotaion.Modify
 import com.meituan.robust.utils.JavaUtils
 import javassist.*
+import javassist.bytecode.Descriptor
 import javassist.expr.ExprEditor
 import javassist.expr.MethodCall
 import org.codehaus.groovy.GroovyException
@@ -118,12 +119,23 @@ class ReadAnnotation {
                                             mm.methodName
 
                                         if (Constants.LAMBDA_MODIFY == mm.method.declaringClass.name) {
-                                            // 复制当前方法到原来的方法中，减少此次方法调用，直接复制会有问题，通过创建同名方法实现
+                                            def newMethod
                                             def originalClass = method.getDeclaringClass()
-                                            originalClass.removeMethod(method)
-                                            def newMethod = CtNewMethod.copy(m.method,
-                                                method.getName(), originalClass, null)
-                                            originalClass.addMethod(newMethod)
+                                            if (Descriptor.numOfParameters(
+                                                method.methodInfo.descriptor) != Descriptor.
+                                                numOfParameters(m.method.methodInfo.descriptor)) {
+                                                newMethod = CtNewMethod.copy(m.method,
+                                                    method.getName() + "_temp", originalClass, null)
+                                                originalClass.addMethod(newMethod)
+                                                m.replace("{ ${newMethod.name}(\$\$); }")
+                                                newMethod = method
+                                            } else {
+                                                // 复制当前方法到原来的方法中，减少此次方法调用，直接复制会有问题，通过创建同名方法实现
+                                                originalClass.removeMethod(method)
+                                                newMethod = CtNewMethod.copy(m.method,
+                                                    method.getName(), originalClass, null)
+                                                originalClass.addMethod(newMethod)
+                                            }
                                             isAllMethodsPatch = false
                                             addPatchMethodAndModifiedClass(patchMethodSignureSet,
                                                 newMethod)
@@ -167,46 +179,6 @@ class ReadAnnotation {
         }
         return patchMethodSignureSet
     }
-
-    /*static boolean findModifyMethod(CtMethod method, Set patchMethodSignureSet) {
-        boolean isAllMethodsPatch = true
-        method.instrument(new ExprEditor() {
-            @Override
-            void edit(MethodCall m) throws CannotCompileException {
-                try {
-                    println "find modify methods : " + method.longName + " :: " + m.method.declaringClass.name + "; " + m.methodName
-                    if (Constants.LAMBDA_MODIFY == m.method.declaringClass.name) {
-                        isAllMethodsPatch = false
-                        addPatchMethodAndModifiedClass(patchMethodSignureSet, method)
-                    } else if (m.methodName.contains("lambda\$")) {
-//                        findModifyMethod(m.method)
-                        m.method.instrument(new ExprEditor() {
-                            @Override
-                            void edit(MethodCall mm) throws CannotCompileException {
-                                println "find modify methods : " + m.method.longName + " :: " + mm.method.declaringClass.name + "; " + mm.methodName
-                                if (Constants.LAMBDA_MODIFY == mm.method.declaringClass.name) {
-                                    isAllMethodsPatch = false
-                                    try {
-                                        addPatchMethodAndModifiedClass(patchMethodSignureSet, m.method)
-                                    } catch (Exception e) {
-                                        println "this is a exception " + e.getMessage()
-                                    }
-                                }
-                            }
-                        })
-                    }
-                } catch (NotFoundException e) {
-                    e.printStackTrace()
-                    logger.warn("  cannot find class  " + method.longName +
-                        " line number " +
-                        m.lineNumber +
-                        " this class may never used ,please remove this class")
-                }
-            }
-        })
-
-        return isAllMethodsPatch
-    }*/
 
     static Set addPatchMethodAndModifiedClass(Set patchMethodSignureSet, CtMethod method) {
         if (Config.methodMap.get(method.longName) == null) {
