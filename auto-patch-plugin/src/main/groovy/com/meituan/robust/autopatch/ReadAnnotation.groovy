@@ -94,9 +94,15 @@ class ReadAnnotation {
         ctclass.declaredMethods.findAll {
             return Config.methodMap.get(it.longName) != null
         }.each { method ->
+            def isPatch = false
+            def isOutMethodCall = false
             method.instrument(new ExprEditor() {
                 @Override
                 void edit(MethodCall m) throws CannotCompileException {
+                    if (isPatch) {
+                        println "this method has patched."
+                        return
+                    }
                     try {
                         println "find modify methods : " + method.longName +
                             " :: " +
@@ -104,6 +110,7 @@ class ReadAnnotation {
                             "; " +
                             m.methodName
                         if (Constants.LAMBDA_MODIFY == m.method.declaringClass.name) {
+                            isPatch = true
                             isAllMethodsPatch = false
                             addPatchMethodAndModifiedClass(patchMethodSignureSet, method)
                         } else if (m.methodName.contains("lambda\$") && m.methodName.endsWith(
@@ -111,42 +118,54 @@ class ReadAnnotation {
                             m.method.instrument(new ExprEditor() {
                                 @Override
                                 void edit(MethodCall mm) throws CannotCompileException {
-                                    try {
-                                        println "!! find modify methods : " + m.method.longName +
-                                            " :: " +
-                                            mm.method.declaringClass.name +
-                                            "; " +
-                                            mm.methodName
-
-                                        if (Constants.LAMBDA_MODIFY == mm.method.declaringClass.name) {
-                                            def newMethod
-                                            def originalClass = method.getDeclaringClass()
-                                            if (Descriptor.numOfParameters(
-                                                method.methodInfo.descriptor) != Descriptor.
-                                                numOfParameters(m.method.methodInfo.descriptor)) {
-                                                newMethod = CtNewMethod.copy(m.method,
-                                                    method.getName() + "_temp", originalClass, null)
-                                                originalClass.addMethod(newMethod)
-                                                m.replace("{ ${newMethod.name}(\$\$); }")
-                                                newMethod = method
-                                            } else {
-                                                // 复制当前方法到原来的方法中，减少此次方法调用，直接复制会有问题，通过创建同名方法实现
-                                                originalClass.removeMethod(method)
-                                                newMethod = CtNewMethod.copy(m.method,
-                                                    method.getName(), originalClass, null)
-                                                originalClass.addMethod(newMethod)
-                                            }
-                                            isAllMethodsPatch = false
-                                            addPatchMethodAndModifiedClass(patchMethodSignureSet,
-                                                newMethod)
-                                        }
-                                    } catch (Exception e) {
-                                        println "this is a exception " + e.getMessage()
+                                    println "!! find modify methods : " + m.method.longName +
+                                        " :: " +
+                                        mm.method.declaringClass.name +
+                                        "; " +
+                                        mm.methodName
+                                    if (Constants.LAMBDA_MODIFY == mm.method.declaringClass.name) {
+                                        isPatch = true
+                                    } else if (m.method.declaringClass.name == mm.method.declaringClass.name) {
+                                        isOutMethodCall = true
                                     }
                                 }
                             })
+                            if (isPatch) {
+                                def newMethod
+                                if (isOutMethodCall) {
+                                    newMethod = CtNewMethod.copy(m.method,
+                                        m.method.getName() + "_temp", m.method.declaringClass,
+                                        null)
+                                    newMethod.setModifiers(Modifier.STATIC)
+                                    m.method.declaringClass.addMethod(newMethod)
+                                    m.replace(
+                                        "{ ${m.method.declaringClass.name}.${newMethod.name}(\$\$); }")
+                                    newMethod = method
+                                } else {
+                                    def originalClass = method.getDeclaringClass()
+                                    if (Descriptor.numOfParameters(method.methodInfo.descriptor) !=
+                                        Descriptor.
+                                            numOfParameters(m.method.methodInfo.descriptor)) {
+                                        // 复制并创建一个新的方法，并替换掉当前调用的方法
+                                        newMethod = CtNewMethod.copy(m.method,
+                                            method.getName() + "_temp", originalClass, null)
+                                        originalClass.addMethod(newMethod)
+                                        m.replace("{ ${newMethod.name}(\$\$); }")
+                                        newMethod = method
+                                    } else {
+                                        // 复制当前方法到原来的方法中，减少此次方法调用，直接复制会有问题，通过创建同名方法实现
+                                        originalClass.removeMethod(method)
+                                        newMethod = CtNewMethod.copy(m.method,
+                                            method.getName(), originalClass, null)
+                                        originalClass.addMethod(newMethod)
+                                    }
+                                }
+                                isAllMethodsPatch = false
+                                addPatchMethodAndModifiedClass(patchMethodSignureSet,
+                                    newMethod)
+                            }
                         }
-                    } catch (NotFoundException e) {
+                    } catch (Exception e) {
                         e.printStackTrace()
                         logger.warn("  cannot find class  " + method.longName +
                             " line number " +
