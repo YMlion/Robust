@@ -104,18 +104,18 @@ class ReadAnnotation {
                         return
                     }
                     try {
+                        def callMethod = m.method
                         println "find modify methods : " + method.longName +
-                            " :: " +
-                            m.method.declaringClass.name +
+                            " :: " + callMethod.declaringClass.name +
                             "; " +
                             m.methodName
-                        if (Constants.LAMBDA_MODIFY == m.method.declaringClass.name) {
+                        if (Constants.LAMBDA_MODIFY == callMethod.declaringClass.name) {
                             isPatch = true
                             isAllMethodsPatch = false
                             addPatchMethodAndModifiedClass(patchMethodSignureSet, method)
                         } else if (m.methodName.contains("lambda\$") && m.methodName.endsWith(
-                            m.method.declaringClass.simpleName)) {
-                            m.method.instrument(new ExprEditor() {
+                            callMethod.declaringClass.simpleName)) {
+                            callMethod.instrument(new ExprEditor() {
                                 @Override
                                 void edit(MethodCall mm) throws CannotCompileException {
                                     println "!! find modify methods : " + m.method.longName +
@@ -130,39 +130,60 @@ class ReadAnnotation {
                                     }
                                 }
                             })
-                            if (isPatch) {
-                                def newMethod
-                                if (isOutMethodCall) {
-                                    newMethod = CtNewMethod.copy(m.method,
-                                        m.method.getName() + "_temp", m.method.declaringClass,
-                                        null)
-                                    newMethod.setModifiers(Modifier.STATIC)
-                                    m.method.declaringClass.addMethod(newMethod)
-                                    m.replace(
-                                        "{ ${m.method.declaringClass.name}.${newMethod.name}(\$\$); }")
-                                    newMethod = method
-                                } else {
-                                    def originalClass = method.getDeclaringClass()
-                                    if (Descriptor.numOfParameters(method.methodInfo.descriptor) !=
-                                        Descriptor.
-                                            numOfParameters(m.method.methodInfo.descriptor)) {
-                                        // 复制并创建一个新的方法，并替换掉当前调用的方法
-                                        newMethod = CtNewMethod.copy(m.method,
-                                            method.getName() + "_temp", originalClass, null)
-                                        originalClass.addMethod(newMethod)
-                                        m.replace("{ ${newMethod.name}(\$\$); }")
+                            try {
+                                if (isPatch) {
+                                    def newMethod
+                                    if (isOutMethodCall) {
+                                        // 外部方法调用
+                                        if (hasOutParams(method, callMethod)) {
+                                            println "lambda fix : 1"
+                                            // 外部变量引用，此时callMethod不会在dex优化中被优化掉
+                                            newAndReplaceMethod(callMethod, method, m)
+                                        } else {
+                                            // 无外部变量引用，此时在dex优化时会被优化掉
+                                            // 此时还有两种情况，一种是原来该方法中就有调用外部类的方法，另一种就是只在修复代码中有外部类方法调用
+                                            def outClassObj = method.getDeclaringClass().
+                                                getDeclaredFields().
+                                                find {
+                                                    it.type.name == callMethod.declaringClass.name
+                                                }
+                                            if (outClassObj == null) {
+                                                // 没有调用外部类方法，仅在修复代码中有外部类调用
+                                                println "lambda fix : 2"
+                                            } else {
+                                                println "lambda fix : 3"
+                                                // 原本就有外部类方法的调用
+                                                newAndReplaceMethod(callMethod, method, m)
+                                            }
+                                        }
                                         newMethod = method
                                     } else {
-                                        // 复制当前方法到原来的方法中，减少此次方法调用，直接复制会有问题，通过创建同名方法实现
-                                        originalClass.removeMethod(method)
-                                        newMethod = CtNewMethod.copy(m.method,
-                                            method.getName(), originalClass, null)
-                                        originalClass.addMethod(newMethod)
+                                        def originalClass = method.getDeclaringClass()
+                                        if (hasOutParams(method, callMethod)) {
+                                            println "lambda fix : 4"
+                                            // 有外部变量引用
+                                            // 复制并创建一个新的方法，并替换掉当前调用的方法
+                                            newMethod = CtNewMethod.copy(callMethod,
+                                                method.getName() + "_temp", originalClass, null)
+                                            originalClass.addMethod(newMethod)
+                                            m.replace("{ ${newMethod.name}(\$\$); }")
+                                            newMethod = method
+                                        } else {
+                                            println "lambda fix : 5"
+                                            // 仅是逻辑代码，不涉及外部方法和变量引用
+                                            // 复制当前方法到原来的方法中，减少此次方法调用，直接复制会有问题，通过创建同名方法实现
+                                            originalClass.removeMethod(method)
+                                            newMethod = CtNewMethod.copy(callMethod,
+                                                method.getName(), originalClass, null)
+                                            originalClass.addMethod(newMethod)
+                                        }
                                     }
+                                    isAllMethodsPatch = false
+                                    addPatchMethodAndModifiedClass(patchMethodSignureSet,
+                                        newMethod)
                                 }
-                                isAllMethodsPatch = false
-                                addPatchMethodAndModifiedClass(patchMethodSignureSet,
-                                    newMethod)
+                            } catch (Exception e) {
+                                e.printStackTrace()
                             }
                         }
                     } catch (Exception e) {
@@ -197,6 +218,50 @@ class ReadAnnotation {
             }
         }
         return patchMethodSignureSet
+    }
+
+    /**
+     * 在外部类中生成新的方法，代替编译时生成的方法
+     *
+     * @param copyMethod 编译时生成的无插桩方法
+     * @param innerMethod 内部类方法，该方法去调用编译时生成的外部类方法，该方法就是需要修复的方法
+     * @return 在外部类中新生成的成员方法
+     */
+    static CtMethod generateNewOutMethod(CtMethod copyMethod, CtMethod innerMethod) {
+        if (Config.methodMap.get(copyMethod.longName) != null) {
+            Config.methodMap.remove(copyMethod.longName)
+        }
+        def newMethod = CtNewMethod.copy(copyMethod,
+            innerMethod.getName() + "\$Proxy\$" + Config.methodMap.get(innerMethod.longName).
+                intValue(),
+            copyMethod.declaringClass, null)
+        newMethod.setModifiers(Modifier.FINAL | Modifier.PUBLIC)
+        copyMethod.declaringClass.addMethod(newMethod)
+        return newMethod
+    }
+
+    /**
+     * 在外部类中生成新的方法，代替编译时生成的方法
+     *
+     * @param copyMethod 编译时生成的无插桩方法
+     * @param innerMethod 内部类方法，该方法去调用编译时生成的外部类方法，该方法就是需要修复的方法
+     * @param mc 无插桩方法调用
+     */
+    static void newAndReplaceMethod(CtMethod replacedMethod, CtMethod innerMethod, MethodCall mc) {
+        def newMethod = generateNewOutMethod(replacedMethod, innerMethod)
+        println "return type is " + newMethod.returnType.name
+        // 不能是静态的，应该使用调用者去调用
+        if (newMethod.returnType.name == "void") {
+            mc.replace("{ \$0.${newMethod.name}(\$\$); }")
+        } else {
+            mc.replace("{ \$_ = \$0.${newMethod.name}(\$\$); }")
+        }
+        newMethod.declaringClass.removeMethod(replacedMethod)
+    }
+
+    static boolean hasOutParams(CtMethod m1, CtMethod m2) {
+        return Descriptor.numOfParameters(m1.methodInfo.descriptor) != Descriptor.
+            numOfParameters(m2.methodInfo.descriptor)
     }
 
     static Set addPatchMethodAndModifiedClass(Set patchMethodSignureSet, CtMethod method) {
