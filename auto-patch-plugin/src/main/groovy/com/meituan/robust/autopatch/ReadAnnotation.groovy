@@ -6,6 +6,7 @@ import com.meituan.robust.patch.annotaion.Modify
 import com.meituan.robust.utils.JavaUtils
 import javassist.*
 import javassist.bytecode.Descriptor
+import javassist.expr.ConstructorCall
 import javassist.expr.ExprEditor
 import javassist.expr.MethodCall
 import org.codehaus.groovy.GroovyException
@@ -106,7 +107,8 @@ class ReadAnnotation {
                     try {
                         def callMethod = m.method
                         println "find modify methods : " + method.longName +
-                            " :: " + callMethod.declaringClass.name +
+                            " :: " +
+                            callMethod.declaringClass.name +
                             "; " +
                             m.methodName
                         if (Constants.LAMBDA_MODIFY == callMethod.declaringClass.name) {
@@ -134,7 +136,7 @@ class ReadAnnotation {
                                 if (isPatch) {
                                     def newMethod
                                     if (isOutMethodCall) {
-                                        // 外部方法调用
+                                        // 修复代码中有外部类方法调用
                                         if (hasOutParams(method, callMethod)) {
                                             println "lambda fix : 1"
                                             // 外部变量引用，此时callMethod不会在dex优化中被优化掉
@@ -142,25 +144,17 @@ class ReadAnnotation {
                                         } else {
                                             // 无外部变量引用，此时在dex优化时会被优化掉
                                             // 此时还有两种情况，一种是原来该方法中就有调用外部类的方法，另一种就是只在修复代码中有外部类方法调用
-                                            def outClassObj = method.getDeclaringClass().
-                                                getDeclaredFields().
-                                                find {
-                                                    it.type.name == callMethod.declaringClass.name
-                                                }
-                                            if (outClassObj == null) {
-                                                // 没有调用外部类方法，仅在修复代码中有外部类调用
-                                                println "lambda fix : 2"
-                                            } else {
-                                                println "lambda fix : 3"
-                                                // 原本就有外部类方法的调用
-                                                newAndReplaceMethod(callMethod, method, m)
-                                            }
+                                            // 但是无法判断这两种情况，因为当前的代码都是修复之后的代码编译而成
+                                            println "lambda fix : 2"
+
+                                            newAndReplaceMethod(callMethod, method, m)
                                         }
                                         newMethod = method
                                     } else {
+                                        // 修复代码无外部类方法调用
                                         def originalClass = method.getDeclaringClass()
                                         if (hasOutParams(method, callMethod)) {
-                                            println "lambda fix : 4"
+                                            println "lambda fix : 3"
                                             // 有外部变量引用
                                             // 复制并创建一个新的方法，并替换掉当前调用的方法
                                             newMethod = CtNewMethod.copy(callMethod,
@@ -169,7 +163,7 @@ class ReadAnnotation {
                                             m.replace("{ ${newMethod.name}(\$\$); }")
                                             newMethod = method
                                         } else {
-                                            println "lambda fix : 5"
+                                            println "lambda fix : 4"
                                             // 仅是逻辑代码，不涉及外部方法和变量引用
                                             // 复制当前方法到原来的方法中，减少此次方法调用，直接复制会有问题，通过创建同名方法实现
                                             originalClass.removeMethod(method)
@@ -193,6 +187,16 @@ class ReadAnnotation {
                             m.lineNumber +
                             " this class may never used ,please remove this class")
                     }
+                }
+
+                void edit(ConstructorCall c) throws CannotCompileException {
+                    println "find Constructor call : " + method.longName +
+                        " :: " +
+                        c.method.declaringClass +
+                        "; " +
+                        c.methodName +
+                        "; " +
+                        c.method.getParameterTypes().size()
                 }
             })
         }
