@@ -6,7 +6,6 @@ import com.meituan.robust.patch.annotaion.Modify
 import com.meituan.robust.utils.JavaUtils
 import javassist.*
 import javassist.bytecode.Descriptor
-import javassist.expr.ConstructorCall
 import javassist.expr.ExprEditor
 import javassist.expr.MethodCall
 import org.codehaus.groovy.GroovyException
@@ -16,6 +15,7 @@ import robust.gradle.plugin.AutoPatchTransform
 class ReadAnnotation {
     static Logger logger
     static int index = 0
+    //    static volatile def lambda2FixList = new ArrayList<String>()
 
     static void readAnnotation(List<CtClass> box, Logger log) {
         logger = log
@@ -145,8 +145,8 @@ class ReadAnnotation {
                                             // 无外部变量引用，此时在dex优化时会被优化掉
                                             // 此时还有两种情况，一种是原来该方法中就有调用外部类的方法，另一种就是只在修复代码中有外部类方法调用
                                             // 但是无法判断这两种情况，因为当前的代码都是修复之后的代码编译而成
-                                            println "lambda fix : 2"
-
+                                            //  lambda2FixList.add(method.declaringClass.name)
+                                            println "lambda fix : 2 "
                                             newAndReplaceMethod(callMethod, method, m)
                                         }
                                         newMethod = method
@@ -189,15 +189,18 @@ class ReadAnnotation {
                     }
                 }
 
-                void edit(ConstructorCall c) throws CannotCompileException {
-                    println "find Constructor call : " + method.longName +
-                        " :: " +
-                        c.method.declaringClass +
-                        "; " +
-                        c.methodName +
-                        "; " +
-                        c.method.getParameterTypes().size()
-                }
+                /*void edit(NewExpr e) throws CannotCompileException {
+                    if (lambda2FixList.contains(e.className)) {
+                        // 第二种情况
+                        // 由于无法判断是否是修复之后才有了外部类方法调用，所以也要修复把创建lambda表达式的方法
+                        println "lambda fix : 2-2"
+                        lambda2FixList.remove(e.className)
+                        isAllMethodsPatch = false
+                        addPatchMethodAndModifiedClass(patchMethodSignureSet,
+                            method)
+                        Config.newlyAddedMethodSet.add(e.constructor.longName)
+                    }
+                }*/
             })
         }
         Modify classModifyAnnotation = ctclass.getAnnotation(
