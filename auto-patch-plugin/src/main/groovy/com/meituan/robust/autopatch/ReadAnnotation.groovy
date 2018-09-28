@@ -14,8 +14,8 @@ import robust.gradle.plugin.AutoPatchTransform
 
 class ReadAnnotation {
     static Logger logger
-    static int index = 0
-    //    static volatile def lambda2FixList = new ArrayList<String>()
+    //    static int index = 0
+    //    static volatildef lambda2FixList = new ArrayList<String>()
 
     static void readAnnotation(List<CtClass> box, Logger log) {
         logger = log
