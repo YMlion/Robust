@@ -6,7 +6,7 @@ compileGroovy {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation 'com.android.tools.build:gradle:3.1.4'
+    implementation 'com.android.tools.build:gradle:3.2.0'
     implementation 'org.javassist:javassist:3.23.1-GA'
     implementation fileTree(dir: "./src/main/libs", include: ['*.jar'])
     implementation project(':autopatchbase')
