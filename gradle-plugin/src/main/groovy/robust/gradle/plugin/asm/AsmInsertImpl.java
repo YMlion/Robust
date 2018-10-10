@@ -75,7 +75,7 @@ public class AsmInsertImpl extends InsertCodeStrategy {
 
         public InsertMethodBodyAdapter(ClassWriter cw, String className,
                 Map<String, Boolean> methodInstructionTypeMap) {
-            super(Opcodes.ASM6, cw);
+            super(Opcodes.ASM5, cw);
             this.classWriter = cw;
             this.className = className;
             this.methodInstructionTypeMap = methodInstructionTypeMap;
@@ -188,7 +188,7 @@ public class AsmInsertImpl extends InsertCodeStrategy {
 
             public MethodBodyInserter(MethodVisitor mv, String className, String desc,
                     boolean isStatic, String methodId, String name, int access) {
-                super(Opcodes.ASM6, mv, access, name, desc);
+                super(Opcodes.ASM5, mv, access, name, desc);
                 this.className = className;
                 this.returnType = Type.getReturnType(desc);
                 Type[] argsType = Type.getArgumentTypes(desc);

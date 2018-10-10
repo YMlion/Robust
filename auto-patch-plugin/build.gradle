@@ -7,7 +7,7 @@ compileGroovy {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation 'com.android.tools.build:gradle:3.2.0'
+    implementation 'com.android.tools.build:gradle:3.0.1'
     implementation 'org.javassist:javassist:3.23.1-GA'
 //    compile 'com.meituan.robust:autopatchbase:' + VERSION_NAME
     implementation project(':autopatchbase')
