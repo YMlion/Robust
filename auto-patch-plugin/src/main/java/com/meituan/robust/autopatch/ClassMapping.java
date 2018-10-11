@@ -46,8 +46,8 @@ public class ClassMapping {
 
         ClassMapping classMapping = (ClassMapping) o;
 
-        return getClassName() != null ? getClassName().equals(classMapping.getClassName()) : classMapping.getClassName() == null;
-
+        return getClassName() != null ? getClassName().equals(classMapping.getClassName())
+                : classMapping.getClassName() == null;
     }
 
     @Override

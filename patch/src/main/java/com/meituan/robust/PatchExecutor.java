@@ -23,7 +23,8 @@ public class PatchExecutor extends Thread {
         this.robustCallBack = robustCallBack;
     }
 
-    @Override public void run() {
+    @Override
+    public void run() {
         try {
             //拉取补丁列表
             List<Patch> patches = fetchPatchList();

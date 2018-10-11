@@ -1,6 +1,5 @@
 package com.meituan.robust.utils;
 
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -13,7 +12,8 @@ import java.lang.reflect.Method;
 public class EnhancedRobustUtils {
     public static boolean isThrowable = true;
 
-    public static Object invokeReflectConstruct(String className, Object[] parameter, Class[] args) {
+    public static Object invokeReflectConstruct(String className, Object[] parameter,
+            Class[] args) {
         try {
             Class clazz = Class.forName(className);
             Constructor constructor = clazz.getDeclaredConstructor(args);
@@ -23,12 +23,14 @@ public class EnhancedRobustUtils {
             e.printStackTrace();
         }
         if (isThrowable) {
-            throw new RuntimeException("invokeReflectConstruct error " + className + "   parameter   " + parameter);
+            throw new RuntimeException(
+                    "invokeReflectConstruct error " + className + "   parameter   " + parameter);
         }
         return null;
     }
 
-    public static Object invokeReflectMethod(String methodName, Object targetObject, Object[] parameters, Class[] args, Class declaringClass) {
+    public static Object invokeReflectMethod(String methodName, Object targetObject,
+            Object[] parameters, Class[] args, Class declaringClass) {
         try {
             Method method = getDeclaredMethod(targetObject, methodName, args, declaringClass);
             return method.invoke(targetObject, parameters);
@@ -36,12 +38,20 @@ public class EnhancedRobustUtils {
             e.printStackTrace();
         }
         if (isThrowable) {
-            throw new RuntimeException("invokeReflectMethod error " + methodName + "   parameter   " + parameters + " targetObject " + targetObject.toString() + "  args  " + args);
+            throw new RuntimeException("invokeReflectMethod error "
+                                               + methodName
+                                               + "   parameter   "
+                                               + parameters
+                                               + " targetObject "
+                                               + targetObject.toString()
+                                               + "  args  "
+                                               + args);
         }
         return null;
     }
 
-    public static Method getDeclaredMethod(Object object, String methodName, Class[] parameterTypes, Class declaringClass) {
+    public static Method getDeclaredMethod(Object object, String methodName, Class[] parameterTypes,
+            Class declaringClass) {
         Method method;
         if (null == declaringClass || !declaringClass.isInterface()) {
 
@@ -66,12 +76,18 @@ public class EnhancedRobustUtils {
             }
         }
         if (isThrowable) {
-            throw new RuntimeException("getDeclaredMethod error " + methodName + "   parameterTypes   " + parameterTypes + " targetObject " + object.toString());
+            throw new RuntimeException("getDeclaredMethod error "
+                                               + methodName
+                                               + "   parameterTypes   "
+                                               + parameterTypes
+                                               + " targetObject "
+                                               + object.toString());
         }
         return null;
     }
 
-    public static Object invokeReflectStaticMethod(String methodName, Class cl, Object[] parameter, Class[] args) {
+    public static Object invokeReflectStaticMethod(String methodName, Class cl, Object[] parameter,
+            Class[] args) {
         try {
             Method method = cl.getDeclaredMethod(methodName, args);
             method.setAccessible(true);
@@ -80,11 +96,15 @@ public class EnhancedRobustUtils {
             e.printStackTrace();
         }
         if (isThrowable) {
-            throw new RuntimeException("invokeReflectStaticMethod error " + methodName + "   class   " + cl + "  args  " + args);
+            throw new RuntimeException("invokeReflectStaticMethod error "
+                                               + methodName
+                                               + "   class   "
+                                               + cl
+                                               + "  args  "
+                                               + args);
         }
         return null;
     }
-
 
     public static void setFieldValue(String name, Object instance, int value, Class cl) {
         try {
@@ -92,10 +112,14 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue int error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue int error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
-
     }
 
     public static void setFieldValue(String name, Object instance, boolean value, Class cl) {
@@ -104,7 +128,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue boolean error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue boolean error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -115,7 +144,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue byte error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue byte error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -126,7 +160,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue char error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue char error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -137,7 +176,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue double error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue double error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -148,7 +192,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue float error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue float error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -159,7 +208,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue long error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue long error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -170,7 +224,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue Object error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue Object error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -181,7 +240,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setFieldValue short error " + name + "   target   " + instance + "  value  " + value);
+                throw new RuntimeException("setFieldValue short error "
+                                                   + name
+                                                   + "   target   "
+                                                   + instance
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -192,7 +256,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setStaticFieldValue Object error " + name + "   Class   " + clazz + "  value  " + value);
+                throw new RuntimeException("setStaticFieldValue Object error "
+                                                   + name
+                                                   + "   Class   "
+                                                   + clazz
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -203,7 +272,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setStaticFieldValue int error " + name + "   Class   " + clazz + "  value  " + value);
+                throw new RuntimeException("setStaticFieldValue int error "
+                                                   + name
+                                                   + "   Class   "
+                                                   + clazz
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -214,7 +288,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setStaticFieldValue boolean error " + name + "   Class   " + clazz + "  value  " + value);
+                throw new RuntimeException("setStaticFieldValue boolean error "
+                                                   + name
+                                                   + "   Class   "
+                                                   + clazz
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -225,7 +304,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setStaticFieldValue Object error " + name + "   Class   " + clazz + "  value  " + value);
+                throw new RuntimeException("setStaticFieldValue Object error "
+                                                   + name
+                                                   + "   Class   "
+                                                   + clazz
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -236,7 +320,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setStaticFieldValue float error " + name + "   Class   " + clazz + "  value  " + value);
+                throw new RuntimeException("setStaticFieldValue float error "
+                                                   + name
+                                                   + "   Class   "
+                                                   + clazz
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -247,7 +336,12 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("setStaticFieldValue long error " + name + "   Class   " + clazz + "  value  " + value);
+                throw new RuntimeException("setStaticFieldValue long error "
+                                                   + name
+                                                   + "   Class   "
+                                                   + clazz
+                                                   + "  value  "
+                                                   + value);
             }
         }
     }
@@ -258,17 +352,21 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("getFieldValue  error " + name + "   instance   " + instance);
+                throw new RuntimeException(
+                        "getFieldValue  error " + name + "   instance   " + instance);
             }
         }
         return null;
     }
 
-    private static Field getReflectField(String name, Object instance, Class cl) throws NoSuchFieldException {
+    private static Field getReflectField(String name, Object instance, Class cl)
+            throws NoSuchFieldException {
         if (cl == null) {
-            if (isThrowable)
+            if (isThrowable) {
                 throw new RuntimeException("Field " + name + " declaring class is null ");
-            else return null;
+            } else {
+                return null;
+            }
         }
         Field field;
         if (!cl.isInterface()) {
@@ -287,7 +385,6 @@ public class EnhancedRobustUtils {
         throw new NoSuchFieldException("Field " + name + " not found in " + instance.getClass());
     }
 
-
     public static Object getStaticFieldValue(String name, Class clazz) {
         try {
             Field field = getReflectStaticField(name, clazz);
@@ -295,13 +392,15 @@ public class EnhancedRobustUtils {
         } catch (Exception e) {
             e.printStackTrace();
             if (isThrowable) {
-                throw new RuntimeException("getStaticFieldValue  error " + name + "   clazz   " + clazz);
+                throw new RuntimeException(
+                        "getStaticFieldValue  error " + name + "   clazz   " + clazz);
             }
         }
         return null;
     }
 
-    private static Field getReflectStaticField(String name, Class clazz) throws NoSuchFieldException {
+    private static Field getReflectStaticField(String name, Class clazz)
+            throws NoSuchFieldException {
         try {
             Field field = clazz.getDeclaredField(name);
             if (!field.isAccessible()) {

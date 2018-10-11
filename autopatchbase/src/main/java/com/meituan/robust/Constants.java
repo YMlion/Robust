@@ -21,7 +21,6 @@ public class Constants {
 
     public static final String PATCH_TEMPLATE_FULL_NAME = "com.meituan.robust.utils.PatchTemplate";
 
-
     public static final String ZIP_FILE_NAME = "meituan.jar";
     public static final String PATACH_DEX_NAME = "patch.dex";
     public static final String CLASSES_DEX_NAME = "classes.dex";
@@ -33,7 +32,8 @@ public class Constants {
     public static final String ROBUST_ASSIST_SUFFIX = "RobustAssist";
     public static final String ROBUST_PUBLIC_SUFFIX = "RobustPublic";
     public static final String GET_REAL_PARAMETER = "getRealParameter";
-    public static final String ROBUST_UTILS_FULL_NAME = "com.meituan.robust.utils.EnhancedRobustUtils";
+    public static final String ROBUST_UTILS_FULL_NAME =
+            "com.meituan.robust.utils.EnhancedRobustUtils";
 
     public static final String ROBUST_GENERATE_DIRECTORY = "outputs/robust";
 
@@ -47,7 +47,8 @@ public class Constants {
     public static Class ModifyAnnotationClass = null;
     public static Class AddAnnotationClass = null;
 
-    public final static String[] LIB_NAME_ARRAY = {"baksmali-2.1.2.jar", "smali-2.1.2.jar", "dx.jar"};
+    public final static String[] LIB_NAME_ARRAY =
+            { "baksmali-2.1.2.jar", "smali-2.1.2.jar", "dx.jar" };
     public static final String PACKNAME_END = ";";
     public final static String PRIMITIVE_TYPE = "ZCBSIJFDV";
     public final static String ARRAY_TYPE = "[";
@@ -106,13 +107,11 @@ public class Constants {
     public static final String METHOD_MAP_OUT_PATH = "/outputs/robust/methodsMap.robust";
     public static final String INTERFACE_NAME = "com.meituan.robust.ChangeQuickRedirect";
     public static final String INSERT_FIELD_NAME = "changeQuickRedirect";
-    public static final List<String> NO_NEED_REFLECT_CLASS = Arrays.asList("android.os.Bundle","android.os.BaseBundle");
+    public static final List<String> NO_NEED_REFLECT_CLASS =
+            Arrays.asList("android.os.Bundle", "android.os.BaseBundle");
 
     //robust apk hash : apk's unique id
     public static final String ROBUST_APK_HASH_FILE_NAME = "robust.apkhash";
     public static final String ASPECTJ_AROUND_CLASS = "org.aspectj.runtime.internal.AroundClosure";
     public static final String PATCH_EXECUTE = "patch execute ,other extension will be ignore ";
-
-
-
 }

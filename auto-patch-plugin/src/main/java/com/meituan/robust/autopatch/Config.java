@@ -1,7 +1,6 @@
 package com.meituan.robust.autopatch;
 
 import com.meituan.robust.Constants;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javassist.ClassPool;
 import javassist.CtMethod;
 
@@ -43,13 +41,12 @@ public final class Config {
     public static List<String> modifiedClassNameList = new ArrayList<>();
     public static List<String> hotfixPackageList = new ArrayList<>();
     public static LinkedHashMap<String, Integer> methodMap = new LinkedHashMap<>();
-    public static  String robustGenerateDirectory;
+    public static String robustGenerateDirectory;
     public static Map<String, List<CtMethod>> invokeSuperMethodMap = new HashMap<>();
     public static ClassPool classPool = new ClassPool();
     public static Set methodNeedPatchSet = new HashSet();
     public static List<CtMethod> addedSuperMethodList = new ArrayList<>();
     public static Set<String> noNeedReflectClassSet = new HashSet<>();
-
 
     public static void init() {
         catchReflectException = false;
@@ -68,7 +65,6 @@ public final class Config {
         addedSuperMethodList = new ArrayList<>();
         noNeedReflectClassSet = new HashSet<>();
         noNeedReflectClassSet.addAll(Constants.NO_NEED_REFLECT_CLASS);
-        supportProGuard=true;
+        supportProGuard = true;
     }
-
 }

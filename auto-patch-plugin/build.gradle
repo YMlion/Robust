@@ -9,7 +9,7 @@ dependencies {
     implementation localGroovy()
     implementation 'com.android.tools.build:gradle:3.0.1'
     implementation 'org.javassist:javassist:3.23.1-GA'
-//    compile 'com.meituan.robust:autopatchbase:' + VERSION_NAME
+    //    compile 'com.meituan.robust:autopatchbase:' + VERSION_NAME
     implementation project(':autopatchbase')
 }
 apply from: '../gradle_mvn_push.gradle'

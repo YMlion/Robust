@@ -1,7 +1,6 @@
 package com.meituan.robust.autopatch;
 
 import com.meituan.robust.Constants;
-
 import java.util.HashMap;
 
 /**
@@ -50,17 +49,27 @@ public class NameManger {
     }
 
     public String getInlinePatchNameWithoutRecord(String className) {
-        String patchName = Config.patchPackageName + "." + className.substring(className.lastIndexOf(".") + 1) + Constants.INLINE_PATCH_SUFFIX;
+        String patchName = Config.patchPackageName
+                + "."
+                + className.substring(className.lastIndexOf(".") + 1)
+                + Constants.INLINE_PATCH_SUFFIX;
         return patchName;
     }
 
     public String getPatchNamWithoutRecord(String className) {
-        String patchName = Config.patchPackageName + "." + className.substring(className.lastIndexOf(".") + 1) + Constants.PATCH_SUFFIX;
+        String patchName = Config.patchPackageName
+                + "."
+                + className.substring(className.lastIndexOf(".") + 1)
+                + Constants.PATCH_SUFFIX;
         return patchName;
     }
 
     public String getPatchControlName(String simpleClassName) {
-        return Config.patchPackageName + "." + simpleClassName + Constants.PATCH_SUFFIX + Constants.PATCH_CONTROL_SUFFIX;
+        return Config.patchPackageName
+                + "."
+                + simpleClassName
+                + Constants.PATCH_SUFFIX
+                + Constants.PATCH_CONTROL_SUFFIX;
     }
 
     public String getAssistClassName(String s) {

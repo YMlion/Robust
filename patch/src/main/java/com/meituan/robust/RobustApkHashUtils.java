@@ -2,7 +2,6 @@ package com.meituan.robust;
 
 import android.content.Context;
 import android.text.TextUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -40,8 +39,7 @@ public class RobustApkHashUtils {
     private static String readFirstLine(Context context, String fileName) {
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(
-                    new InputStreamReader(context.getAssets().open(fileName)));
+            reader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName)));
 
             return reader.readLine();
         } catch (IOException e) {
@@ -55,5 +53,4 @@ public class RobustApkHashUtils {
             }
         }
     }
-
 }
