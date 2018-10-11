@@ -44,7 +44,8 @@ public class AsmInsertImpl extends InsertCodeStrategy {
               isHotfixMethodLevel, isExceptMethodLevel);
     }
 
-    @Override protected void insertCode(List<CtClass> box, File jarFile)
+    @Override
+    protected void insertCode(List<CtClass> box, File jarFile)
             throws IOException, CannotCompileException {
         ZipOutputStream outStream = new JarOutputStream(new FileOutputStream(jarFile));
         //get every class in the box ,ready to insert code
@@ -197,7 +198,8 @@ public class AsmInsertImpl extends InsertCodeStrategy {
                 this.methodId = methodId;
             }
 
-            @Override public void visitCode() {
+            @Override
+            public void visitCode() {
                 //insert code here
                 RobustAsmUtils
                         .createInsertCode(this, className, paramsTypeClass, returnType, isStatic,

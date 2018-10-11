@@ -29,15 +29,15 @@ import static com.meituan.robust.Constants.ORIGINCLASS;
 
 public class JavaUtils {
 
-//    public static void removeJarFromLibs() {
-//        File file;
-//        for (String libName : LIB_NAME_ARRAY) {
-//            file = new File(AutoPatchTransform.ROBUST_DIR + libName);
-//            if (file.exists()) {
-//                file.delete();
-//            }
-//        }
-//    }
+    //    public static void removeJarFromLibs() {
+    //        File file;
+    //        for (String libName : LIB_NAME_ARRAY) {
+    //            file = new File(AutoPatchTransform.ROBUST_DIR + libName);
+    //            if (file.exists()) {
+    //                file.delete();
+    //            }
+    //        }
+    //    }
 
     public static Object getMapFromZippedFile(String path) {
         File file = new File(path);
@@ -59,7 +59,8 @@ public class JavaUtils {
                 gzipIn.close();
                 oi.close();
             } else {
-                throw new RuntimeException("getMapFromZippedFile error,file doesn't exist ,path is " + path);
+                throw new RuntimeException(
+                        "getMapFromZippedFile error,file doesn't exist ,path is " + path);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -254,8 +255,8 @@ public class JavaUtils {
         return patchClass;
     }
 
-    public
-    static boolean isMethodSignureContainPatchClassName(String name, List<String> modifiedClassNameList) {
+    public static boolean isMethodSignureContainPatchClassName(String name,
+            List<String> modifiedClassNameList) {
         for (String classname : modifiedClassNameList) {
             if (name.startsWith(classname)) {
                 return true;
@@ -280,13 +281,14 @@ public class JavaUtils {
             System.out.println("key is   " + key);
     }
 
-
     public static String getFullClassNameFromFile(String path) {
         if (path.indexOf("classout") > 0) {
-            return path.substring(path.indexOf("classout") + "classout".length() + 1, path.lastIndexOf(".smali")).replace(File.separatorChar, '.');
+            return path.substring(path.indexOf("classout") + "classout".length() + 1,
+                                  path.lastIndexOf(".smali")).replace(File.separatorChar, '.');
         }
         if (path.indexOf("main") > 0) {
-            return path.substring(path.indexOf("main") + "main".length() + 1, path.lastIndexOf(".class")).replace(File.separatorChar, '.');
+            return path.substring(path.indexOf("main") + "main".length() + 1,
+                                  path.lastIndexOf(".class")).replace(File.separatorChar, '.');
         }
         throw new RuntimeException("can not analysis " + path + "  get full class name error!!");
     }
@@ -314,5 +316,4 @@ public class JavaUtils {
         methodSignure.append(")");
         return methodSignure.toString();
     }
-
 }

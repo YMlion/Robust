@@ -7,12 +7,13 @@ package com.meituan.robust;
 public class RobustArguments {
     public Object[] paramsArray;
     public Object current;
-    public  boolean isStatic;
+    public boolean isStatic;
     public int methodNumber;
     public Class[] paramsClassTypes;
     public Class returnType;
 
-    public RobustArguments(Object[] paramsArray, Object current,  boolean isStatic, int methodNumber, Class[] paramsClassTypes, Class returnType) {
+    public RobustArguments(Object[] paramsArray, Object current, boolean isStatic, int methodNumber,
+            Class[] paramsClassTypes, Class returnType) {
         this.paramsArray = paramsArray;
         this.current = current;
         this.isStatic = isStatic;

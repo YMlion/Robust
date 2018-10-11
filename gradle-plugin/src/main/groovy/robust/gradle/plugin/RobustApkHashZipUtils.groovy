@@ -5,8 +5,7 @@ import com.meituan.robust.Constants
 import java.util.zip.*
 
 /**
- * Created by hedex on 17/2/14.
- */
+ * Created by hedex on 17/2/14.*/
 class RobustApkHashZipUtils {
     static void packZip(File output, List<File> sources) throws IOException {
         ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(output))
@@ -14,9 +13,9 @@ class RobustApkHashZipUtils {
 
         List<File> fileList = new LinkedList<File>()
         for (Object source : sources) {
-            if (source instanceof File){
+            if (source instanceof File) {
                 fileList.add(source)
-            } else if (source instanceof Collection){
+            } else if (source instanceof Collection) {
                 fileList.addAll(source)
             } else {
                 System.err.println("packZip source 4" + source.getClass())
@@ -57,7 +56,6 @@ class RobustApkHashZipUtils {
                 zipFile(zos, path, source)
             }
         }
-
     }
 
     static void zipFile(ZipOutputStream zos, String path, File file) throws IOException {
@@ -95,7 +93,8 @@ class RobustApkHashZipUtils {
             ZipEntry originZipEntry = entries.nextElement()
             ZipEntry rightZipEntry = getRightZipEntry(originZipEntry)
             if (null != rightZipEntry) {
-                addZipEntry(zipOutputStream, rightZipEntry, apZipFile.getInputStream(originZipEntry))
+                addZipEntry(zipOutputStream, rightZipEntry,
+                    apZipFile.getInputStream(originZipEntry))
             }
         }
 
@@ -118,7 +117,7 @@ class RobustApkHashZipUtils {
         tempZipFile.renameTo(apFile.getAbsolutePath())
     }
 
-    private static ZipEntry getRightZipEntry(ZipEntry originZipEntry){
+    private static ZipEntry getRightZipEntry(ZipEntry originZipEntry) {
         ZipEntry rightZipEntry = new ZipEntry(originZipEntry.getName())
         if (ZipEntry.STORED == originZipEntry.getMethod()) {
             rightZipEntry.setMethod(ZipEntry.STORED)
@@ -165,7 +164,8 @@ class RobustApkHashZipUtils {
      * @throws Exception
      */
     private
-    static void addZipEntry(ZipOutputStream zipOutputStream, ZipEntry zipEntry, InputStream inputStream) throws Exception {
+    static void addZipEntry(ZipOutputStream zipOutputStream, ZipEntry zipEntry,
+        InputStream inputStream) throws Exception {
         try {
             zipOutputStream.putNextEntry(zipEntry)
             byte[] buffer = new byte[1024]

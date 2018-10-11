@@ -39,7 +39,8 @@ public class JavaAssistInsertImpl extends InsertCodeStrategy {
               isHotfixMethodLevel, isExceptMethodLevel);
     }
 
-    @Override protected void insertCode(List<CtClass> box, File jarFile)
+    @Override
+    protected void insertCode(List<CtClass> box, File jarFile)
             throws CannotCompileException, IOException, NotFoundException {
         ZipOutputStream outStream = new JarOutputStream(new FileOutputStream(jarFile));
         //        new ForkJoinPool().submit {

@@ -10,9 +10,9 @@ import org.apache.commons.io.FileUtils
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.regex.Matcher
+
 /**
- * Created by mivanzhang on 16/11/3.
- */
+ * Created by mivanzhang on 16/11/3.*/
 class ConvertUtils {
     static List<CtClass> toCtClasses(Collection<TransformInput> inputs, ClassPool classPool) {
         List<String> classNames = new ArrayList<>()
@@ -24,9 +24,13 @@ class ConvertUtils {
                 classPool.insertClassPath(it.file.absolutePath)
                 FileUtils.listFiles(it.file, null, true).each {
                     if (it.absolutePath.endsWith(SdkConstants.DOT_CLASS)) {
-                        def className = it.absolutePath.substring(dirPath.length() + 1, it.absolutePath.length() - SdkConstants.DOT_CLASS.length()).replaceAll(Matcher.quoteReplacement(File.separator), '.')
-                        if(classNames.contains(className)){
-                            throw new RuntimeException("You have duplicate classes with the same name : "+className+" please remove duplicate classes ")
+                        def className = it.absolutePath.substring(dirPath.length() + 1,
+                            it.absolutePath.length() - SdkConstants.DOT_CLASS.length()).
+                            replaceAll(Matcher.quoteReplacement(File.separator), '.')
+                        if (classNames.contains(className)) {
+                            throw new RuntimeException(
+                                "You have duplicate classes with the same name : " + className +
+                                    " please remove duplicate classes ")
                         }
                         classNames.add(className)
                     }
@@ -41,9 +45,13 @@ class ConvertUtils {
                     JarEntry libClass = classes.nextElement()
                     String className = libClass.getName()
                     if (className.endsWith(SdkConstants.DOT_CLASS)) {
-                        className = className.substring(0, className.length() - SdkConstants.DOT_CLASS.length()).replaceAll('/', '.')
-                        if(classNames.contains(className)){
-                            throw new RuntimeException("You have duplicate classes with the same name : "+className+" please remove duplicate classes ")
+                        className = className.substring(0,
+                            className.length() - SdkConstants.DOT_CLASS.length()).
+                            replaceAll('/', '.')
+                        if (classNames.contains(className)) {
+                            throw new RuntimeException(
+                                "You have duplicate classes with the same name : " + className +
+                                    " please remove duplicate classes ")
                         }
                         classNames.add(className)
                     }
@@ -58,7 +66,6 @@ class ConvertUtils {
             } catch (NotFoundException e) {
                 println "class not found exception class name:  $it "
             }
-
         }
 
         Collections.sort(allClass, new Comparator<CtClass>() {
@@ -69,6 +76,4 @@ class ConvertUtils {
         })
         return allClass
     }
-
-
 }
