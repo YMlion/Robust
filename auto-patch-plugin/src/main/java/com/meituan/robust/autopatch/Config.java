@@ -26,7 +26,7 @@ public final class Config {
     public static boolean isManual = false;
     // 是否改变补丁的输出目录
     public static boolean changePatchDir = false;
-    // 补丁的输出目录，项目根目录是补丁输出目录的父目录或者根目录，例如目录是projectRootDir/patch，则该值为patch
+    // 补丁的输出目录，项目根目录和补丁输出目录在同一父目录中，如果是projectRootDir.parent/patch，则该值为patch
     public static String patchTargetDir = null;
     // 构建类型
     public static String patchBuildType = "release";
